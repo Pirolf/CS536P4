@@ -29,4 +29,19 @@ public class SymFunc extends Sym{
     public LinkedList<Sym> getParams(){
         return params;
     }
+
+    @override
+    /*This should be used for debugging ONLY*/
+    public String toString(){
+        String retContent = "";
+        retContent += "Type: function\n " + "Return Type: " + retType + "\n";
+        String paramList = "";
+        Iterator<Sym> it = params.Iterator();
+        while(it.hasNext()){
+            paramList += it.next().getType() +", ";
+        } 
+        retContent += "Number of params: " + params.size() + "\n" + "ParamList: " + paramList;
+        return retContent; 
+    }
+
 }
