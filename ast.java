@@ -108,11 +108,12 @@ import java.util.*;
 abstract class ASTnode { 
     // every subclass must provide an unparse operation
     abstract public void unparse(PrintWriter p, int indent);
-
     // this method can be used by the unparse methods to do indenting
     protected void doIndent(PrintWriter p, int indent) {
         for (int k=0; k<indent; k++) p.print(" ");
     }
+    public static List<SymTable> symTblList() = new LinkedList<SymTable>();
+    public static int currScope = 0;
 }
 
 // **********************************************************************
@@ -177,7 +178,10 @@ class FormalsListNode extends ASTnode {
         } 
     }
     public void analyzeName(){
-        myFormals.analyzeName();
+        Iterator<FormalDeclNode> it = myFormals.iterator();
+        while(it.hasNext()){
+            it.next().analyzeName();
+        }
     }
     // list of kids (FormalDeclNodes)
     private List<FormalDeclNode> myFormals;
@@ -272,8 +276,8 @@ class VarDeclNode extends DeclNode {
         p.println(";");
     }
     public void analyzeName(){
-        myType.analyzeName();
         myId.analyzeName();
+        myType.analyzeName();
     }
     // 3 kids
     private TypeNode myType;
@@ -308,6 +312,8 @@ class FnDeclNode extends DeclNode {
     public void analyzeName(){       
         myId.analyzeName();
         myType.analyzeName();
+        currScope++;
+        symTblList.addFirst(new SymTable());
         Iterator<FormalsListNode> it = myFormalsList.iterator();
         while(it.hasNext()){
             it.next().analyzeName();
