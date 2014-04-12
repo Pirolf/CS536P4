@@ -112,8 +112,9 @@ abstract class ASTnode {
     protected void doIndent(PrintWriter p, int indent) {
         for (int k=0; k<indent; k++) p.print(" ");
     }
-    public static List<SymTable> symTblList() = new LinkedList<SymTable>();
-    public static int currScope = 0;
+    //public static List<SymTable> symTblList() = new LinkedList<SymTable>();
+    public static SymTable symTbl;
+    public static int currScope;
 }
 
 // **********************************************************************
@@ -132,6 +133,8 @@ class ProgramNode extends ASTnode {
     }
 
     public void analyzeName(){
+        symTbl = new SymTable();
+        currScope  = 0;
         myDeclList.analyzeName();
     }
     // 1 kid
@@ -155,6 +158,10 @@ class DeclListNode extends ASTnode {
         }
     }
     public void analyzeName(){
+        //scope entry
+        currScope++;
+        symTbl.addScope();
+
         myDecls.analyzeName();
     }
 
@@ -178,6 +185,9 @@ class FormalsListNode extends ASTnode {
         } 
     }
     public void analyzeName(){
+        //scope entry
+        currScope++;
+        symTblList.addScope();
         Iterator<FormalDeclNode> it = myFormals.iterator();
         while(it.hasNext()){
             it.next().analyzeName();
@@ -200,6 +210,9 @@ class FnBodyNode extends ASTnode {
     public void analyzeName(){
         myDeclList.analyzeName();
         myStmtList.analyzeName();
+        //exit scope
+        symTbl.removeScope();
+        currScope--;
     }
     // 2 kids
     private DeclListNode myDeclList;
@@ -312,8 +325,6 @@ class FnDeclNode extends DeclNode {
     public void analyzeName(){       
         myId.analyzeName();
         myType.analyzeName();
-        currScope++;
-        symTblList.addFirst(new SymTable());
         Iterator<FormalsListNode> it = myFormalsList.iterator();
         while(it.hasNext()){
             it.next().analyzeName();
@@ -365,10 +376,16 @@ class StructDeclNode extends DeclNode {
     }
     public void analyzeName(){
         myId.analyzeName();
+        //scope entry
+        currScope++;
+        symTbl.addScope();
         Iterator<DeclListNode> it = myDeclList.iterator();
         while(it.hasNext()){
             it.next().analyzeName();
         }
+        //scope exit
+        symTbl.removeScope();
+        currScope--;
     }
     // 2 kids
     private IdNode myId;
@@ -538,6 +555,9 @@ class IfStmtNode extends StmtNode {
     }
     public void analyzeName(){
         myExp.analyzeName();
+        //scope entry
+        currScope++;
+        symTbl.addScope();
         Iterator<DeclListNode> itDLN = myDeclList.iterator();
         while(itDLN.hasNext()){
             itDLN.next().analyzeName();
@@ -546,6 +566,9 @@ class IfStmtNode extends StmtNode {
         while(itSLN.hasNext()){
             itSLN.next().analyzeName();
         }
+        //scope exit
+        currScope--
+        symTbl.removeScope();
     }
     // e kids
     private ExpNode myExp;
@@ -586,18 +609,30 @@ class IfElseStmtNode extends StmtNode {
         Iterator<StmtListNode> itSThen = myThenStmtList.iterator();
         Iterator<StmtListNode> itSElse = myElseStmtList.iterator();
         Iterator<DeclListNode> itDElse = myElseDeclList.iterator();
+        //scope entry
+        currScope++;
+        symTbl.addScope();
         while(itDThen.hasNext()){
             itDThen.next().analyzeName();
         }
         while(itSThen.hasNext()){
             itSThen.next().analyzeName();
         }
+        //scope entry
+        currScope++;
+        symTbl.addScope();
         while(itDElse.hasNext()){
             itDElse.next().analyzeName();
         }
         while(itSElse.hasNext()){
             itSElse.next().analyzeName();
         }
+        //scope exit: else
+        currScope--;
+        symTbl.removeScope();
+        //scope exit: if else block
+        currScope--;
+        symTbl.removeScope();
     }
     // 5 kids
     private ExpNode myExp;
@@ -628,12 +663,18 @@ class WhileStmtNode extends StmtNode {
         myExp.analyzeName();
         Iterator<DeclListNode> itD = myDeclList.iterator();
         Iterator<StmtListNode> itS = myStmtList.iterator();
+        //scope entry
+        currScope++;
+        symTbl.addScope();
         while(itD.hasNext()){
             itD.next().analyzeName();
         }
         while(itS.hasNext()){
             itS.next().analyzeName();
         }
+        //scope exit
+        currScope--;
+        symTbl.removeScope();
     }
     // 3 kids
     private ExpNode myExp;
