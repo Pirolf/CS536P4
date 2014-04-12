@@ -350,8 +350,10 @@ class FormalDeclNode extends DeclNode {
         myId.unparse(p, 0);
     }
     public void analyzeName(){    
-       // myId.analyzeName(); //should not do this
-        myType.analyzeName();
+        myId.analyzeName();
+        if(symTbl.lookupLocal(myId.getName()) != null){
+            symTbl.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
+        } //we don't have to deal with struct here because it is not allowed to be a param
     }
     // 2 kids
     private TypeNode myType;
@@ -406,6 +408,10 @@ class IntNode extends TypeNode {
     public void unparse(PrintWriter p, int indent) {
         p.print("int");
     }
+
+    public String getTypeNodeType(){
+        return "int";
+    }
 }
 
 class BoolNode extends TypeNode {
@@ -415,6 +421,10 @@ class BoolNode extends TypeNode {
     public void unparse(PrintWriter p, int indent) {
         p.print("bool");
     }
+    public String getTypeNodeType(){
+        return "bool";
+    }
+
 }
 
 class VoidNode extends TypeNode {
@@ -423,6 +433,10 @@ class VoidNode extends TypeNode {
 
     public void unparse(PrintWriter p, int indent) {
         p.print("void");
+    }
+
+    public String getTypeNodeType(){
+        return "void";
     }
 }
 
@@ -438,6 +452,7 @@ class StructNode extends TypeNode {
     public void analyzeName(){
         myId.analyzeName();
     }
+    //TODO
     // 1 kid
     private IdNode myId;
 }
@@ -816,6 +831,21 @@ class IdNode extends ExpNode {
         
     }
 
+    public void analyzeName(){
+        //DO WE NEED THIS AT ALL?
+        
+    }
+
+    public Sym getSym(){
+        return mySym;
+    }
+
+    public void setSym(Sym s){
+        Sym = s;
+    }
+    public String getName(){
+        return myStrVal;
+    }
     private int myLineNum;
     private int myCharNum;
     private String myStrVal;
