@@ -120,6 +120,7 @@ abstract class ASTnode {
 // StmtListNode, ExpListNode
 // **********************************************************************
 
+//ISSUES: Scoping, Error Handling
 class ProgramNode extends ASTnode {
     public ProgramNode(DeclListNode L) {
         myDeclList = L;
@@ -129,6 +130,9 @@ class ProgramNode extends ASTnode {
         myDeclList.unparse(p, indent);
     }
 
+    public void analyzeName(){
+        myDeclList.analyzeName();
+    }
     // 1 kid
     private DeclListNode myDeclList;
 }
@@ -148,6 +152,9 @@ class DeclListNode extends ASTnode {
             System.err.println("unexpected NoSuchElementException in DeclListNode.print");
             System.exit(-1);
         }
+    }
+    public void analyzeName(){
+        myDecls.analyzeName();
     }
 
     // list of kids (DeclNodes)
@@ -169,7 +176,9 @@ class FormalsListNode extends ASTnode {
             }
         } 
     }
-
+    public void analyzeName(){
+        myFormals.analyzeName();
+    }
     // list of kids (FormalDeclNodes)
     private List<FormalDeclNode> myFormals;
 }
@@ -184,7 +193,10 @@ class FnBodyNode extends ASTnode {
         myDeclList.unparse(p, indent);
         myStmtList.unparse(p, indent);
     }
-
+    public void analyzeName(){
+        myDeclList.analyzeName();
+        myStmtList.analyzeName();
+    }
     // 2 kids
     private DeclListNode myDeclList;
     private StmtListNode myStmtList;
@@ -201,7 +213,12 @@ class StmtListNode extends ASTnode {
             it.next().unparse(p, indent);
         }
     }
-
+    public void analyzeName(){
+        Iterator<StmtNode> it = myStmts.iterator();
+        while (it.hasNext()) {
+            it.next().analyzeName();
+        }
+    }
     // list of kids (StmtNodes)
     private List<StmtNode> myStmts;
 }
@@ -221,6 +238,12 @@ class ExpListNode extends ASTnode {
             }
         } 
     }
+    public void analyzeName(){
+        Iterator<ExpNode> it = myExps.iterator();
+        while (it.hasNext()) {
+            it.next().analyzeName();
+        }
+    }
 
     // list of kids (ExpNodes)
     private List<ExpNode> myExps;
@@ -231,6 +254,7 @@ class ExpListNode extends ASTnode {
 // **********************************************************************
 
 abstract class DeclNode extends ASTnode {
+    abstract public void analyzeName();
 }
 
 class VarDeclNode extends DeclNode {
@@ -247,7 +271,10 @@ class VarDeclNode extends DeclNode {
         myId.unparse(p, 0);
         p.println(";");
     }
-
+    public void analyzeName(){
+        myType.analyzeName();
+        myId.analyzeName();
+    }
     // 3 kids
     private TypeNode myType;
     private IdNode myId;
@@ -278,7 +305,15 @@ class FnDeclNode extends DeclNode {
         myBody.unparse(p, indent+4);
         p.println("}\n");
     }
-
+    public void analyzeName(){       
+        myId.analyzeName();
+        myType.analyzeName();
+        Iterator<FormalsListNode> it = myFormalsList.iterator();
+        while(it.hasNext()){
+            it.next().analyzeName();
+        }
+        myBody.analyzeName();
+    }
     // 4 kids
     private TypeNode myType;
     private IdNode myId;
@@ -297,7 +332,10 @@ class FormalDeclNode extends DeclNode {
         p.print(" ");
         myId.unparse(p, 0);
     }
-
+    public void analyzeName(){    
+       // myId.analyzeName(); //should not do this
+        myType.analyzeName();
+    }
     // 2 kids
     private TypeNode myType;
     private IdNode myId;
@@ -319,7 +357,13 @@ class StructDeclNode extends DeclNode {
         p.println("};\n");
 
     }
-
+    public void analyzeName(){
+        myId.analyzeName();
+        Iterator<DeclListNode> it = myDeclList.iterator();
+        while(it.hasNext()){
+            it.next().analyzeName();
+        }
+    }
     // 2 kids
     private IdNode myId;
     private DeclListNode myDeclList;
@@ -368,7 +412,9 @@ class StructNode extends TypeNode {
         p.print("struct ");
         myId.unparse(p, 0);
     }
-    
+    public void analyzeName(){
+        myId.analyzeName();
+    }
     // 1 kid
     private IdNode myId;
 }
@@ -390,7 +436,9 @@ class AssignStmtNode extends StmtNode {
         myAssign.unparse(p, -1); // no parentheses
         p.println(";");
     }
-
+    public void analyzeName(){
+        myAssign.analyzeName();
+    }
     // 1 kid
     private AssignNode myAssign;
 }
@@ -405,7 +453,9 @@ class PostIncStmtNode extends StmtNode {
         myExp.unparse(p, 0);
         p.println("++;");
     }
-
+    public void analyzeName(){
+        myExp.analyzeName();
+    }
     // 1 kid
     private ExpNode myExp;
 }
@@ -420,7 +470,9 @@ class PostDecStmtNode extends StmtNode {
         myExp.unparse(p, 0);
         p.println("--;");
     }
-
+    public void analyzeName(){
+        myExp.analyzeName();
+    }
     // 1 kid
     private ExpNode myExp;
 }
@@ -436,7 +488,9 @@ class ReadStmtNode extends StmtNode {
         myExp.unparse(p, 0);
         p.println(";");
     }
-
+    public void analyzeName(){
+        myExp.analyzeName();
+    }
     // 1 kid (actually can only be an IdNode or an ArrayExpNode)
     private ExpNode myExp;
 }
@@ -452,7 +506,9 @@ class WriteStmtNode extends StmtNode {
         myExp.unparse(p, 0);
         p.println(";");
     }
-
+    public void analyzeName(){
+        myExp.analyzeName();
+    }
     // 1 kid
     private ExpNode myExp;
 }
@@ -474,7 +530,17 @@ class IfStmtNode extends StmtNode {
         doIndent(p, indent);
         p.println("}");
     }
-
+    public void analyzeName(){
+        myExp.analyzeName();
+        Iterator<DeclListNode> itDLN = myDeclList.iterator();
+        while(itDLN.hasNext()){
+            itDLN.next().analyzeName();
+        }
+        Iterator<StmtListNode> itSLN = myStmtList.iterator();
+        while(itSLN.hasNext()){
+            itSLN.next().analyzeName();
+        }
+    }
     // e kids
     private ExpNode myExp;
     private DeclListNode myDeclList;
@@ -508,7 +574,25 @@ class IfElseStmtNode extends StmtNode {
         doIndent(p, indent);
         p.println("}");        
     }
-
+    public void analyzeName(){
+        myExp.analyzeName();
+        Iterator<DeclListNode> itDThen = myThenDeclList.iterator();
+        Iterator<StmtListNode> itSThen = myThenStmtList.iterator();
+        Iterator<StmtListNode> itSElse = myElseStmtList.iterator();
+        Iterator<DeclListNode> itDElse = myElseDeclList.iterator();
+        while(itDThen.hasNext()){
+            itDThen.next().analyzeName();
+        }
+        while(itSThen.hasNext()){
+            itSThen.next().analyzeName();
+        }
+        while(itDElse.hasNext()){
+            itDElse.next().analyzeName();
+        }
+        while(itSElse.hasNext()){
+            itSElse.next().analyzeName();
+        }
+    }
     // 5 kids
     private ExpNode myExp;
     private DeclListNode myThenDeclList;
@@ -534,7 +618,17 @@ class WhileStmtNode extends StmtNode {
         doIndent(p, indent);
         p.println("}");
     }
-
+    public void analyzeName(){
+        myExp.analyzeName();
+        Iterator<DeclListNode> itD = myDeclList.iterator();
+        Iterator<StmtListNode> itS = myStmtList.iterator();
+        while(itD.hasNext()){
+            itD.next().analyzeName();
+        }
+        while(itS.hasNext()){
+            itS.next().analyzeName();
+        }
+    }
     // 3 kids
     private ExpNode myExp;
     private DeclListNode myDeclList;
@@ -551,7 +645,9 @@ class CallStmtNode extends StmtNode {
         myCall.unparse(p, indent);
         p.println(";");
     }
-
+    public void analyzeName(){
+        myCall.analyzeName();
+    }
     // 1 kid
     private CallExpNode myCall;
 }
@@ -570,7 +666,9 @@ class ReturnStmtNode extends StmtNode {
         }
         p.println(";");
     }
-
+    public void analyzeName(){
+        myExp.analyzeName();
+    }
     // 1 kid
     private ExpNode myExp; // possibly null
 }
@@ -670,7 +768,10 @@ class DotAccessExpNode extends ExpNode {
         p.print(").");
         myId.unparse(p, 0);
     }
-
+    public void analyzeName(){
+        myLoc.analyzeName();
+        myId.analyzeName();
+    }
     // 2 kids
     private ExpNode myLoc;    
     private IdNode myId;
@@ -689,7 +790,10 @@ class AssignNode extends ExpNode {
         myExp.unparse(p, 0);
         if (indent != -1)  p.print(")");
     }
-
+    public void analyzeName(){
+        myLhs.analyzeName();
+        myExp.analyzeName();
+    }
     // 2 kids
     private ExpNode myLhs;
     private ExpNode myExp;
@@ -715,7 +819,10 @@ class CallExpNode extends ExpNode {
         }
         p.print(")");
     }
-
+    public void analyzeName(){
+        myId.analyzeName();
+        myExpList.analyzeName();
+    }
     // 2 kids
     private IdNode myId;
     private ExpListNode myExpList;  // possibly null
@@ -735,7 +842,6 @@ abstract class BinaryExpNode extends ExpNode {
         myExp1 = exp1;
         myExp2 = exp2;
     }
-
     // two kids
     protected ExpNode myExp1;
     protected ExpNode myExp2;
@@ -755,6 +861,9 @@ class UnaryMinusNode extends UnaryExpNode {
         myExp.unparse(p, 0);
         p.print(")");
     }
+    public void analyzeName(){
+        myExp.analyzeName();
+    }
 }
 
 class NotNode extends UnaryExpNode {
@@ -766,6 +875,9 @@ class NotNode extends UnaryExpNode {
         p.print("(!");
         myExp.unparse(p, 0);
         p.print(")");
+    }
+    public void analyzeName(){
+        myExp.analyzeName();
     }
 }
 
@@ -785,6 +897,10 @@ class PlusNode extends BinaryExpNode {
         myExp2.unparse(p, 0);
         p.print(")");
     }
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
+    }
 }
 
 class MinusNode extends BinaryExpNode {
@@ -798,6 +914,11 @@ class MinusNode extends BinaryExpNode {
         p.print(" - ");
         myExp2.unparse(p, 0);
         p.print(")");
+    }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
     }
 }
 
@@ -813,6 +934,11 @@ class TimesNode extends BinaryExpNode {
         myExp2.unparse(p, 0);
         p.print(")");
     }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
+    }
 }
 
 class DivideNode extends BinaryExpNode {
@@ -826,6 +952,11 @@ class DivideNode extends BinaryExpNode {
         p.print(" / ");
         myExp2.unparse(p, 0);
         p.print(")");
+    }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
     }
 }
 
@@ -841,6 +972,11 @@ class AndNode extends BinaryExpNode {
         myExp2.unparse(p, 0);
         p.print(")");
     }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
+    }
 }
 
 class OrNode extends BinaryExpNode {
@@ -854,6 +990,11 @@ class OrNode extends BinaryExpNode {
         p.print(" || ");
         myExp2.unparse(p, 0);
         p.print(")");
+    }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
     }
 }
 
@@ -869,6 +1010,11 @@ class EqualsNode extends BinaryExpNode {
         myExp2.unparse(p, 0);
         p.print(")");
     }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
+    }
 }
 
 class NotEqualsNode extends BinaryExpNode {
@@ -882,6 +1028,11 @@ class NotEqualsNode extends BinaryExpNode {
         p.print(" != ");
         myExp2.unparse(p, 0);
         p.print(")");
+    }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
     }
 }
 
@@ -897,6 +1048,11 @@ class LessNode extends BinaryExpNode {
         myExp2.unparse(p, 0);
         p.print(")");
     }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
+    }
 }
 
 class GreaterNode extends BinaryExpNode {
@@ -910,6 +1066,11 @@ class GreaterNode extends BinaryExpNode {
         p.print(" > ");
         myExp2.unparse(p, 0);
         p.print(")");
+    }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
     }
 }
 
@@ -925,6 +1086,11 @@ class LessEqNode extends BinaryExpNode {
         myExp2.unparse(p, 0);
         p.print(")");
     }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
+    }
 }
 
 class GreaterEqNode extends BinaryExpNode {
@@ -938,5 +1104,10 @@ class GreaterEqNode extends BinaryExpNode {
         p.print(" >= ");
         myExp2.unparse(p, 0);
         p.print(")");
+    }
+
+    public void analyzeName(){
+        myExp1.analyzeName();
+        myExp2.analyzeName();
     }
 }
