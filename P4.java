@@ -12,7 +12,7 @@ import java_cup.runtime.*;
  * calls the parser.  If the parse is successful, the AST is unparsed.
  */
 
-public class P3 {
+public class P4 {
     public static void main(String[] args)
         throws IOException // may be thrown by the scanner
     {
