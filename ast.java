@@ -114,6 +114,7 @@ abstract class ASTnode {
     }
     //public static List<SymTable> symTblList() = new LinkedList<SymTable>();
     public static SymTable symTbl;
+    public static SymTable structSymTbl;//for struct decls
     public static int currScope;
 }
 
@@ -377,17 +378,24 @@ class StructDeclNode extends DeclNode {
 
     }
     public void analyzeName(){
-        myId.analyzeName();
+        //should also add to symtbl
         //scope entry
-        currScope++;
-        symTbl.addScope();
+        if(structSymTbl == null){
+            structSymTbl = new SymTable();
+        }
+        structSymTbl.addScope();
         Iterator<DeclListNode> it = myDeclList.iterator();
         while(it.hasNext()){
+            //The fields of a struct must be unique to 
+            //that particular struct; 
+            //however, they can be a name that has been declared
+            //outside of the struct definition
             it.next().analyzeName();
         }
         //scope exit
-        symTbl.removeScope();
-        currScope--;
+        structSymTbl.removeScope();
+        symTbl.lookupLocal(myId.getName());
+        symTbl.addDecl(myId.getName(), "struct");//name, type
     }
     // 2 kids
     private IdNode myId;
@@ -450,7 +458,7 @@ class StructNode extends TypeNode {
         myId.unparse(p, 0);
     }
     public void analyzeName(){
-        myId.analyzeName();
+        //should look up in stuct symtable
     }
     //TODO
     // 1 kid
