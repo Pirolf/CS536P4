@@ -796,11 +796,30 @@ class IdNode extends ExpNode {
 
     public void unparse(PrintWriter p, int indent) {
         p.print(myStrVal);
+        if(mySym.getType().equals("function")){
+            List<Sym> myParams = mySym.getParams();
+            //param1Type, param2Type, ..., paramNType -> returnType
+            p.print("(");
+            Iterator<Sym> paramItr = myParams.iterator();
+
+            if(paramItr.hasNext()){
+                p.print(paramItr.next().getType());
+                while(paramItr.hasNext()){
+                    p.print(", " + paramItr.next().getType());
+                }
+            }
+            p.print("->" + mySym.getRetType());
+            p.print(")");
+        }else{
+            p.print("("+ mySym.getType() + ")");
+        }
+        
     }
 
     private int myLineNum;
     private int myCharNum;
     private String myStrVal;
+    private Sym mySym;//to link the node with the corresponding symbol-table entry
 }
 
 class DotAccessExpNode extends ExpNode {
