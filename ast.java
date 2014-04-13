@@ -290,8 +290,33 @@ class VarDeclNode extends DeclNode {
         p.println(";");
     }
     public void analyzeName(){
-        myId.analyzeName();
-        myType.analyzeName();
+        //eg. int ID; 
+        if(mySize == NOT_STRUCT){
+            if(symTbl.lookupLocal(myId.getName()) == null){
+            Sym s = new Sym(myType.getTypeNodeType());
+            myId.setSym(s);
+            symTbl.addDecl(myId.getName(), s);
+            }
+        }    
+        else{
+            //is struct: Struct date d;
+            Sym s = new Sym(myType.getTypeNodeType());
+            myId.setSym(s);
+            if(symTbl.lookupglobal(myType.getTypeNodeType()) != null){
+                //date has been declared
+                symTbl.addDecl(myId.getName(), s);
+            }
+        }
+        
+    }
+    //for var decls within a struct
+    //Struct date d;
+    public void analyzeNameStruct(SymTable st){
+        analyzeName();
+        //check if 'date' has been declared: lookupglobal
+        if(symTbl.lookupglobal(myId.getName()) != null){
+
+        }
     }
     // 3 kids
     private TypeNode myType;
@@ -380,17 +405,27 @@ class StructDeclNode extends DeclNode {
     public void analyzeName(){
         //should also add to symtbl
         //scope entry
-        if(structSymTbl == null){
-            structSymTbl = new SymTable();
-        }
-        structSymTbl.addScope();
+        SymTable structSymTbl = new SymTable();
+        
         Iterator<DeclListNode> it = myDeclList.iterator();
         while(it.hasNext()){
             //The fields of a struct must be unique to 
             //that particular struct; 
             //however, they can be a name that has been declared
             //outside of the struct definition
-            it.next().analyzeName();
+            /*
+            //Is this allowed?
+            struct date{
+                int year;
+            };
+            struct date2{
+                int year;
+            };
+            */
+            //look up local
+            DeclListNode currNode = it.next();
+            //add decl
+            currNode.analyzeNameStruct(structSymTbl);
         }
         //scope exit
         structSymTbl.removeScope();
@@ -459,6 +494,10 @@ class StructNode extends TypeNode {
     }
     public void analyzeName(){
         //should look up in stuct symtable
+    }
+
+    public String getTypeNodeType(){
+        return myId.getName();
     }
     //TODO
     // 1 kid
@@ -840,16 +879,26 @@ class IdNode extends ExpNode {
     }
 
     public void analyzeName(){
-        //DO WE NEED THIS AT ALL?
-        
+        //DO WE NEED THIS AT ALL? YES?
+        //I AM CONFUSED
+        //NO
+        /*
+        if(symTbl.lookupLocal(myStrVal) == null){
+            mySym = new Sym();
+            symTbl.addDecl(myStrVal, mySym);
+        }
+        */
     }
+    public void analyzeNameStruct(SymTable st){
+        //look up locally
 
+    }
     public Sym getSym(){
         return mySym;
     }
 
     public void setSym(Sym s){
-        Sym = s;
+        mySym = s;
     }
     public String getName(){
         return myStrVal;
