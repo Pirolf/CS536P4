@@ -165,6 +165,11 @@ class DeclListNode extends ASTnode {
 
         myDecls.analyzeName();
     }
+    public void analyzeNameStruct(SymTable st){
+        symTbl.addScope();
+
+        myDecls.analyzeNameStruct(st);
+    }
 
     // list of kids (DeclNodes)
     private List<DeclNode> myDecls;
@@ -299,12 +304,12 @@ class VarDeclNode extends DeclNode {
             }
         }    
         else{
-            //is struct: Struct date d;
-            Sym s = new Sym(myType.getTypeNodeType());
+            //is struct: struct date d;
+            Sym s = new Sym(myType.getTypeNodeType());//Sym("date");
             myId.setSym(s);
             if(symTbl.lookupglobal(myType.getTypeNodeType()) != null){
                 //date has been declared
-                symTbl.addDecl(myId.getName(), s);
+                symTbl.addDecl(myId.getName(), s);//name:d, type:date
             }
         }
         
@@ -313,10 +318,12 @@ class VarDeclNode extends DeclNode {
     //Struct date d;
     public void analyzeNameStruct(SymTable st){
         analyzeName();
-        //check if 'date' has been declared: lookupglobal
-        if(symTbl.lookupglobal(myId.getName()) != null){
+        //struct date{ int year; int month; struct datetime dt;} 
+        //name: year; sym: new Sym("date"); pass!
+        //name: month; sym: new Sym("date"); pass!
+        //name: dt; sym: new Sym('dt'); pass!
+        st.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
 
-        }
     }
     // 3 kids
     private TypeNode myType;
@@ -406,9 +413,10 @@ class StructDeclNode extends DeclNode {
         //should also add to symtbl
         //scope entry
         SymTable structSymTbl = new SymTable();
+        myDeclList.analyzeNameStruct(structSymTbl);
+       // Iterator<DeclListNode> it = myDeclList.iterator();
         
-        Iterator<DeclListNode> it = myDeclList.iterator();
-        while(it.hasNext()){
+       // while(it.hasNext()){
             //The fields of a struct must be unique to 
             //that particular struct; 
             //however, they can be a name that has been declared
@@ -423,12 +431,14 @@ class StructDeclNode extends DeclNode {
             };
             */
             //look up local
-            DeclListNode currNode = it.next();
+            //DeclListNode currNode = it.next();
             //add decl
-            currNode.analyzeNameStruct(structSymTbl);
-        }
-        //scope exit
-        structSymTbl.removeScope();
+           // currNode.analyzeName();
+        //}
+
+
+        //scope exit: 
+        //structSymTbl.removeScope();
         symTbl.lookupLocal(myId.getName());
         symTbl.addDecl(myId.getName(), "struct");//name, type
     }
@@ -680,6 +690,9 @@ class IfElseStmtNode extends StmtNode {
         while(itSThen.hasNext()){
             itSThen.next().analyzeName();
         }
+        //scope exit: if
+        currScope--;
+        symTbl.removeScope();
         //scope entry
         currScope++;
         symTbl.addScope();
@@ -690,9 +703,6 @@ class IfElseStmtNode extends StmtNode {
             itSElse.next().analyzeName();
         }
         //scope exit: else
-        currScope--;
-        symTbl.removeScope();
-        //scope exit: if else block
         currScope--;
         symTbl.removeScope();
     }
