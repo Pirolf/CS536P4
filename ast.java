@@ -919,7 +919,11 @@ class IdNode extends ExpNode {
     private String myStrVal;
     private Sym mySym;//to link the node with the corresponding symbol-table entry
 }
-
+/*
+ * A bad struct access happens when
+ * either the left-hand side of the dot-access is not a name already declared to be of a struct type
+ * or the right-hand side of the dot-access is not the name of a field for the appropriate type of struct
+ */
 class DotAccessExpNode extends ExpNode {
     public DotAccessExpNode(ExpNode loc, IdNode id) {
         myLoc = loc;    
@@ -933,7 +937,14 @@ class DotAccessExpNode extends ExpNode {
         myId.unparse(p, 0);
     }
     public void analyzeName(){
+        //check if myLoc is struct
+        if(myLoc instanceof DotAccessNode){
+
+        }else if(myLoc instanceof IdNode){
+            //look up in structSymTbl
+        }
         myLoc.analyzeName();
+        //look up in structSymTbl: is myId a field of the struct
         myId.analyzeName();
     }
     // 2 kids
