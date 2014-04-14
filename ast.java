@@ -160,7 +160,6 @@ class DeclListNode extends ASTnode {
     }
     public void analyzeName(){
         //scope entry
-        currScope++;
         symTbl.addScope();
 
         myDecls.analyzeName();
@@ -322,7 +321,7 @@ class VarDeclNode extends DeclNode {
         //name: year; sym: new Sym("date"); pass!
         //name: month; sym: new Sym("date"); pass!
         //name: dt; sym: new Sym('dt'); pass!
-        st.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
+        structSymTbl.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
 
     }
     // 3 kids
@@ -412,7 +411,12 @@ class StructDeclNode extends DeclNode {
     public void analyzeName(){
         //should also add to symtbl
         //scope entry
-        SymTable structSymTbl = new SymTable();
+        if(structSymTbl == null){
+            structSymTbl = new SymTable();
+        }else{
+            structSymTbl.addScope();
+        }
+        
         myDeclList.analyzeNameStruct(structSymTbl);
        // Iterator<DeclListNode> it = myDeclList.iterator();
         
