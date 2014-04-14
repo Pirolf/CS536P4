@@ -113,7 +113,7 @@ abstract class ASTnode {
         for (int k=0; k<indent; k++) p.print(" ");
     }
     //public static List<SymTable> symTblList() = new LinkedList<SymTable>();
-    public static SymTable symTbl;
+public static SymTable symTbl;
     public static SymTable structSymTbl;//for struct decls
     public static int currScope;
 }
@@ -295,9 +295,9 @@ class VarDeclNode extends DeclNode {
         //eg. int ID; 
         if(mySize == NOT_STRUCT){
             if(symTbl.lookupLocal(myId.getName()) == null){
-            Sym s = new Sym(myType.getTypeNodeType());
-            myId.setSym(s);
-            symTbl.addDecl(myId.getName(), s);
+                Sym s = new Sym(myType.getTypeNodeType());
+                myId.setSym(s);
+                symTbl.addDecl(myId.getName(), s);
             }
         }    
         else{
@@ -332,9 +332,9 @@ class VarDeclNode extends DeclNode {
 
 class FnDeclNode extends DeclNode {
     public FnDeclNode(TypeNode type,
-                      IdNode id,
-                      FormalsListNode formalList,
-                      FnBodyNode body) {
+      IdNode id,
+      FormalsListNode formalList,
+      FnBodyNode body) {
         myType = type;
         myId = id;
         myFormalsList = formalList;
@@ -347,41 +347,41 @@ class FnDeclNode extends DeclNode {
         p.print(" ");
         myId.unparse(p, 0);
         p.print("(");
-        myFormalsList.unparse(p, 0);
-        p.println(") {");
-        myBody.unparse(p, indent+4);
-        p.println("}\n");
-    }
-    public void analyzeName(){       
-        myId.analyzeName();
-        myType.analyzeName();
-        Iterator<FormalsListNode> it = myFormalsList.iterator();
-        while(it.hasNext()){
-            it.next().analyzeName();
+            myFormalsList.unparse(p, 0);
+            p.println(") {");
+            myBody.unparse(p, indent+4);
+            p.println("}\n");
         }
-        myBody.analyzeName();
-    }
+        public void analyzeName(){       
+            myId.analyzeName();
+            myType.analyzeName();
+            Iterator<FormalsListNode> it = myFormalsList.iterator();
+            while(it.hasNext()){
+                it.next().analyzeName();
+            }
+            myBody.analyzeName();
+        }
     // 4 kids
-    private TypeNode myType;
-    private IdNode myId;
-    private FormalsListNode myFormalsList;
-    private FnBodyNode myBody;
-}
-
-class FormalDeclNode extends DeclNode {
-    public FormalDeclNode(TypeNode type, IdNode id) {
-        myType = type;
-        myId = id;
+        private TypeNode myType;
+        private IdNode myId;
+        private FormalsListNode myFormalsList;
+        private FnBodyNode myBody;
     }
 
-    public void unparse(PrintWriter p, int indent) {
-        myType.unparse(p, 0);
-        p.print(" ");
-        myId.unparse(p, 0);
-    }
-    public void analyzeName(){    
-        if(symTbl.lookupLocal(myId.getName()) != null){
-            symTbl.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
+    class FormalDeclNode extends DeclNode {
+        public FormalDeclNode(TypeNode type, IdNode id) {
+            myType = type;
+            myId = id;
+        }
+
+        public void unparse(PrintWriter p, int indent) {
+            myType.unparse(p, 0);
+            p.print(" ");
+            myId.unparse(p, 0);
+        }
+        public void analyzeName(){    
+            if(symTbl.lookupLocal(myId.getName()) != null){
+                symTbl.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
         } //we don't have to deal with struct here because it is not allowed to be a param
     }
     // 2 kids
@@ -440,7 +440,7 @@ class StructDeclNode extends DeclNode {
 
         //scope exit: 
         //structSymTbl.removeScope();
-        symTbl.lookupLocal(myId.getName());
+            symTbl.lookupLocal(myId.getName());
         symTbl.addDecl(myId.getName(), "struct");//name, type
     }
     // 2 kids
@@ -619,176 +619,176 @@ class IfStmtNode extends StmtNode {
     public void unparse(PrintWriter p, int indent) {
         doIndent(p, indent);
         p.print("if (");
-        myExp.unparse(p, 0);
-        p.println(") {");
-        myDeclList.unparse(p, indent+4);
-        myStmtList.unparse(p, indent+4);
-        doIndent(p, indent);
-        p.println("}");
-    }
-    public void analyzeName(){
-        myExp.analyzeName();
-        //scope entry
-        currScope++;
-        symTbl.addScope();
-        Iterator<DeclListNode> itDLN = myDeclList.iterator();
-        while(itDLN.hasNext()){
-            itDLN.next().analyzeName();
-        }
-        Iterator<StmtListNode> itSLN = myStmtList.iterator();
-        while(itSLN.hasNext()){
-            itSLN.next().analyzeName();
-        }
-        //scope exit
-        currScope--
-        symTbl.removeScope();
-    }
-    // e kids
-    private ExpNode myExp;
-    private DeclListNode myDeclList;
-    private StmtListNode myStmtList;
-}
-
-class IfElseStmtNode extends StmtNode {
-    public IfElseStmtNode(ExpNode exp, DeclListNode dlist1,
-                          StmtListNode slist1, DeclListNode dlist2,
-                          StmtListNode slist2) {
-        myExp = exp;
-        myThenDeclList = dlist1;
-        myThenStmtList = slist1;
-        myElseDeclList = dlist2;
-        myElseStmtList = slist2;
-    }
-
-    public void unparse(PrintWriter p, int indent) {
-        doIndent(p, indent);
-        p.print("if (");
-        myExp.unparse(p, 0);
-        p.println(") {");
-        myThenDeclList.unparse(p, indent+4);
-        myThenStmtList.unparse(p, indent+4);
-        doIndent(p, indent);
-        p.println("}");
-        doIndent(p, indent);
-        p.println("else {");
-        myElseDeclList.unparse(p, indent+4);
-        myElseStmtList.unparse(p, indent+4);
-        doIndent(p, indent);
-        p.println("}");        
-    }
-    public void analyzeName(){
-        myExp.analyzeName();
-        Iterator<DeclListNode> itDThen = myThenDeclList.iterator();
-        Iterator<StmtListNode> itSThen = myThenStmtList.iterator();
-        Iterator<StmtListNode> itSElse = myElseStmtList.iterator();
-        Iterator<DeclListNode> itDElse = myElseDeclList.iterator();
-        //scope entry
-        currScope++;
-        symTbl.addScope();
-        while(itDThen.hasNext()){
-            itDThen.next().analyzeName();
-        }
-        while(itSThen.hasNext()){
-            itSThen.next().analyzeName();
-        }
-        //scope exit: if
-        currScope--;
-        symTbl.removeScope();
-        //scope entry
-        currScope++;
-        symTbl.addScope();
-        while(itDElse.hasNext()){
-            itDElse.next().analyzeName();
-        }
-        while(itSElse.hasNext()){
-            itSElse.next().analyzeName();
-        }
-        //scope exit: else
-        currScope--;
-        symTbl.removeScope();
-    }
-    // 5 kids
-    private ExpNode myExp;
-    private DeclListNode myThenDeclList;
-    private StmtListNode myThenStmtList;
-    private StmtListNode myElseStmtList;
-    private DeclListNode myElseDeclList;
-}
-
-class WhileStmtNode extends StmtNode {
-    public WhileStmtNode(ExpNode exp, DeclListNode dlist, StmtListNode slist) {
-        myExp = exp;
-        myDeclList = dlist;
-        myStmtList = slist;
-    }
-    
-    public void unparse(PrintWriter p, int indent) {
-        doIndent(p, indent);
-        p.print("while (");
-        myExp.unparse(p, 0);
-        p.println(") {");
-        myDeclList.unparse(p, indent+4);
-        myStmtList.unparse(p, indent+4);
-        doIndent(p, indent);
-        p.println("}");
-    }
-    public void analyzeName(){
-        myExp.analyzeName();
-        Iterator<DeclListNode> itD = myDeclList.iterator();
-        Iterator<StmtListNode> itS = myStmtList.iterator();
-        //scope entry
-        currScope++;
-        symTbl.addScope();
-        while(itD.hasNext()){
-            itD.next().analyzeName();
-        }
-        while(itS.hasNext()){
-            itS.next().analyzeName();
-        }
-        //scope exit
-        currScope--;
-        symTbl.removeScope();
-    }
-    // 3 kids
-    private ExpNode myExp;
-    private DeclListNode myDeclList;
-    private StmtListNode myStmtList;
-}
-
-class CallStmtNode extends StmtNode {
-    public CallStmtNode(CallExpNode call) {
-        myCall = call;
-    }
-
-    public void unparse(PrintWriter p, int indent) {
-        doIndent(p, indent);
-        myCall.unparse(p, indent);
-        p.println(";");
-    }
-    public void analyzeName(){
-        myCall.analyzeName();
-    }
-    // 1 kid
-    private CallExpNode myCall;
-}
-
-class ReturnStmtNode extends StmtNode {
-    public ReturnStmtNode(ExpNode exp) {
-        myExp = exp;
-    }
-
-    public void unparse(PrintWriter p, int indent) {
-        doIndent(p, indent);
-        p.print("return");
-        if (myExp != null) {
-            p.print(" ");
             myExp.unparse(p, 0);
+            p.println(") {");
+            myDeclList.unparse(p, indent+4);
+            myStmtList.unparse(p, indent+4);
+            doIndent(p, indent);
+            p.println("}");
         }
-        p.println(";");
+        public void analyzeName(){
+            myExp.analyzeName();
+        //scope entry
+            currScope++;
+            symTbl.addScope();
+            Iterator<DeclListNode> itDLN = myDeclList.iterator();
+            while(itDLN.hasNext()){
+                itDLN.next().analyzeName();
+            }
+            Iterator<StmtListNode> itSLN = myStmtList.iterator();
+            while(itSLN.hasNext()){
+                itSLN.next().analyzeName();
+            }
+        //scope exit
+            currScope--
+            symTbl.removeScope();
+        }
+    // e kids
+        private ExpNode myExp;
+        private DeclListNode myDeclList;
+        private StmtListNode myStmtList;
     }
-    public void analyzeName(){
-        myExp.analyzeName();
-    }
+
+    class IfElseStmtNode extends StmtNode {
+        public IfElseStmtNode(ExpNode exp, DeclListNode dlist1,
+          StmtListNode slist1, DeclListNode dlist2,
+          StmtListNode slist2) {
+            myExp = exp;
+            myThenDeclList = dlist1;
+            myThenStmtList = slist1;
+            myElseDeclList = dlist2;
+            myElseStmtList = slist2;
+        }
+
+        public void unparse(PrintWriter p, int indent) {
+            doIndent(p, indent);
+            p.print("if (");
+                myExp.unparse(p, 0);
+                p.println(") {");
+                myThenDeclList.unparse(p, indent+4);
+                myThenStmtList.unparse(p, indent+4);
+                doIndent(p, indent);
+                p.println("}");
+                doIndent(p, indent);
+                p.println("else {");
+                myElseDeclList.unparse(p, indent+4);
+                myElseStmtList.unparse(p, indent+4);
+                doIndent(p, indent);
+                p.println("}");        
+            }
+            public void analyzeName(){
+                myExp.analyzeName();
+                Iterator<DeclListNode> itDThen = myThenDeclList.iterator();
+                Iterator<StmtListNode> itSThen = myThenStmtList.iterator();
+                Iterator<StmtListNode> itSElse = myElseStmtList.iterator();
+                Iterator<DeclListNode> itDElse = myElseDeclList.iterator();
+        //scope entry
+                currScope++;
+                symTbl.addScope();
+                while(itDThen.hasNext()){
+                    itDThen.next().analyzeName();
+                }
+                while(itSThen.hasNext()){
+                    itSThen.next().analyzeName();
+                }
+        //scope exit: if
+                currScope--;
+                symTbl.removeScope();
+        //scope entry
+                currScope++;
+                symTbl.addScope();
+                while(itDElse.hasNext()){
+                    itDElse.next().analyzeName();
+                }
+                while(itSElse.hasNext()){
+                    itSElse.next().analyzeName();
+                }
+        //scope exit: else
+                currScope--;
+                symTbl.removeScope();
+            }
+    // 5 kids
+            private ExpNode myExp;
+            private DeclListNode myThenDeclList;
+            private StmtListNode myThenStmtList;
+            private StmtListNode myElseStmtList;
+            private DeclListNode myElseDeclList;
+        }
+
+        class WhileStmtNode extends StmtNode {
+            public WhileStmtNode(ExpNode exp, DeclListNode dlist, StmtListNode slist) {
+                myExp = exp;
+                myDeclList = dlist;
+                myStmtList = slist;
+            }
+
+            public void unparse(PrintWriter p, int indent) {
+                doIndent(p, indent);
+                p.print("while (");
+                    myExp.unparse(p, 0);
+                    p.println(") {");
+                    myDeclList.unparse(p, indent+4);
+                    myStmtList.unparse(p, indent+4);
+                    doIndent(p, indent);
+                    p.println("}");
+                }
+                public void analyzeName(){
+                    myExp.analyzeName();
+                    Iterator<DeclListNode> itD = myDeclList.iterator();
+                    Iterator<StmtListNode> itS = myStmtList.iterator();
+        //scope entry
+                    currScope++;
+                    symTbl.addScope();
+                    while(itD.hasNext()){
+                        itD.next().analyzeName();
+                    }
+                    while(itS.hasNext()){
+                        itS.next().analyzeName();
+                    }
+        //scope exit
+                    currScope--;
+                    symTbl.removeScope();
+                }
+    // 3 kids
+                private ExpNode myExp;
+                private DeclListNode myDeclList;
+                private StmtListNode myStmtList;
+            }
+
+            class CallStmtNode extends StmtNode {
+                public CallStmtNode(CallExpNode call) {
+                    myCall = call;
+                }
+
+                public void unparse(PrintWriter p, int indent) {
+                    doIndent(p, indent);
+                    myCall.unparse(p, indent);
+                    p.println(";");
+                }
+                public void analyzeName(){
+                    myCall.analyzeName();
+                }
+    // 1 kid
+                private CallExpNode myCall;
+            }
+
+            class ReturnStmtNode extends StmtNode {
+                public ReturnStmtNode(ExpNode exp) {
+                    myExp = exp;
+                }
+
+                public void unparse(PrintWriter p, int indent) {
+                    doIndent(p, indent);
+                    p.print("return");
+                    if (myExp != null) {
+                        p.print(" ");
+                        myExp.unparse(p, 0);
+                    }
+                    p.println(";");
+                }
+                public void analyzeName(){
+                    myExp.analyzeName();
+                }
     // 1 kid
     private ExpNode myExp; // possibly null
 }
@@ -873,23 +873,23 @@ class IdNode extends ExpNode {
             List<Sym> myParams = mySym.getParams();
             //param1Type, param2Type, ..., paramNType -> returnType
             p.print("(");
-            Iterator<Sym> paramItr = myParams.iterator();
+                Iterator<Sym> paramItr = myParams.iterator();
 
-            if(paramItr.hasNext()){
-                p.print(paramItr.next().getType());
-                while(paramItr.hasNext()){
-                    p.print(", " + paramItr.next().getType());
+                if(paramItr.hasNext()){
+                    p.print(paramItr.next().getType());
+                    while(paramItr.hasNext()){
+                        p.print(", " + paramItr.next().getType());
+                    }
                 }
+                p.print("->" + mySym.getRetType());
+                p.print(")");
+            }else{
+                p.print("("+ mySym.getType() + ")");
             }
-            p.print("->" + mySym.getRetType());
-            p.print(")");
-        }else{
-            p.print("("+ mySym.getType() + ")");
-        }
-        
-    }
 
-    public void analyzeName(){
+        }
+
+        public void analyzeName(){
         //DO WE NEED THIS AT ALL? YES?
         //I AM CONFUSED
         //NO
@@ -932,74 +932,84 @@ class DotAccessExpNode extends ExpNode {
 
     public void unparse(PrintWriter p, int indent) {
         p.print("(");
-        myLoc.unparse(p, 0);
-        p.print(").");
-        myId.unparse(p, 0);
-    }
-    public void analyzeName(){
-        //check if myLoc is struct
-        if(myLoc instanceof DotAccessNode){
-
-        }else if(myLoc instanceof IdNode){
-            //look up in structSymTbl
+            myLoc.unparse(p, 0);
+            p.print(").");
+            myId.unparse(p, 0);
         }
-        myLoc.analyzeName();
-        //look up in structSymTbl: is myId a field of the struct
-        myId.analyzeName();
-    }
+        public void analyzeName(){
+        //base case
+            if(myLoc instanceof IdNode){
+            //s1.s2.s3
+            //check if myLoc is struct: lookup global in symTbl
+            //look up in structSymTbl: is myId a field of the struct
+                if(symTbl.lookupGlobal(myLoc.getName()) != null){
+                    structSym = structSymTbl.lookupGlobal(myId.getName();
+                    if(structSym == null){
+                        //throw exception
+                    }else if(!structSym.getType().equals(myLoc.getName())){
+                        //throw exception
+                    }
+                }else{
+                    //throw exception
+                }
+            }else if(myLoc instanceof ExpNode){
+                myLoc.analyzeName();
+            }
+
+        }
     // 2 kids
-    private ExpNode myLoc;    
-    private IdNode myId;
-}
-
-class AssignNode extends ExpNode {
-    public AssignNode(ExpNode lhs, ExpNode exp) {
-        myLhs = lhs;
-        myExp = exp;
+        private ExpNode myLoc;    
+        private IdNode myId;
     }
 
-    public void unparse(PrintWriter p, int indent) {
-        if (indent != -1)  p.print("(");
-        myLhs.unparse(p, 0);
-        p.print(" = ");
-        myExp.unparse(p, 0);
-        if (indent != -1)  p.print(")");
-    }
-    public void analyzeName(){
-        myLhs.analyzeName();
-        myExp.analyzeName();
-    }
+    class AssignNode extends ExpNode {
+        public AssignNode(ExpNode lhs, ExpNode exp) {
+            myLhs = lhs;
+            myExp = exp;
+        }
+
+        public void unparse(PrintWriter p, int indent) {
+            if (indent != -1)  p.print("(");
+                myLhs.unparse(p, 0);
+                p.print(" = ");
+                myExp.unparse(p, 0);
+                if (indent != -1)  p.print(")");
+            }
+            public void analyzeName(){
+                myLhs.analyzeName();
+                myExp.analyzeName();
+            }
     // 2 kids
-    private ExpNode myLhs;
-    private ExpNode myExp;
-}
+            private ExpNode myLhs;
+            private ExpNode myExp;
+        }
 
-class CallExpNode extends ExpNode {
-    public CallExpNode(IdNode name, ExpListNode elist) {
-        myId = name;
-        myExpList = elist;
-    }
+        class CallExpNode extends ExpNode {
+            public CallExpNode(IdNode name, ExpListNode elist) {
+                myId = name;
+                myExpList = elist;
+            }
 
-    public CallExpNode(IdNode name) {
-        myId = name;
-        myExpList = new ExpListNode(new LinkedList<ExpNode>());
-    }
+            public CallExpNode(IdNode name) {
+                myId = name;
+                myExpList = new ExpListNode(new LinkedList<ExpNode>());
+            }
 
     // ** unparse **
-    public void unparse(PrintWriter p, int indent) {
-        myId.unparse(p, 0);
-        p.print("(");
-        if (myExpList != null) {
-            myExpList.unparse(p, 0);
-        }
-        p.print(")");
-    }
-    public void analyzeName(){
-        myId.analyzeName();
-        myExpList.analyzeName();
-    }
+            public void unparse(PrintWriter p, int indent) {
+                myId.unparse(p, 0);
+                p.print("(");
+                    if (myExpList != null) {
+                        myExpList.unparse(p, 0);
+                    }
+                    p.print(")");
+                }
+                public void analyzeName(){
+                    myId.analyzeName();
+                    myExpList.analyzeName();
+                }
     // 2 kids
-    private IdNode myId;
+                private IdNode myId;
     private ExpListNode myExpList;  // possibly null
 }
 
@@ -1033,256 +1043,256 @@ class UnaryMinusNode extends UnaryExpNode {
 
     public void unparse(PrintWriter p, int indent) {
         p.print("(-");
-        myExp.unparse(p, 0);
-        p.print(")");
-    }
-    public void analyzeName(){
-        myExp.analyzeName();
-    }
-}
-
-class NotNode extends UnaryExpNode {
-    public NotNode(ExpNode exp) {
-        super(exp);
+            myExp.unparse(p, 0);
+            p.print(")");
+        }
+        public void analyzeName(){
+            myExp.analyzeName();
+        }
     }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(!");
-        myExp.unparse(p, 0);
-        p.print(")");
-    }
-    public void analyzeName(){
-        myExp.analyzeName();
-    }
-}
+    class NotNode extends UnaryExpNode {
+        public NotNode(ExpNode exp) {
+            super(exp);
+        }
+
+        public void unparse(PrintWriter p, int indent) {
+            p.print("(!");
+                myExp.unparse(p, 0);
+                p.print(")");
+            }
+            public void analyzeName(){
+                myExp.analyzeName();
+            }
+        }
 
 // **********************************************************************
 // Subclasses of BinaryExpNode
 // **********************************************************************
 
-class PlusNode extends BinaryExpNode {
-    public PlusNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+        class PlusNode extends BinaryExpNode {
+            public PlusNode(ExpNode exp1, ExpNode exp2) {
+                super(exp1, exp2);
+            }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" + ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+            public void unparse(PrintWriter p, int indent) {
+                p.print("(");
+                    myExp1.unparse(p, 0);
+                    p.print(" + ");
+                    myExp2.unparse(p, 0);
+                    p.print(")");
+                }
+                public void analyzeName(){
+                    myExp1.analyzeName();
+                    myExp2.analyzeName();
+                }
+            }
 
-class MinusNode extends BinaryExpNode {
-    public MinusNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+            class MinusNode extends BinaryExpNode {
+                public MinusNode(ExpNode exp1, ExpNode exp2) {
+                    super(exp1, exp2);
+                }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" - ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                public void unparse(PrintWriter p, int indent) {
+                    p.print("(");
+                        myExp1.unparse(p, 0);
+                        p.print(" - ");
+                        myExp2.unparse(p, 0);
+                        p.print(")");
+                    }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                    public void analyzeName(){
+                        myExp1.analyzeName();
+                        myExp2.analyzeName();
+                    }
+                }
 
-class TimesNode extends BinaryExpNode {
-    public TimesNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                class TimesNode extends BinaryExpNode {
+                    public TimesNode(ExpNode exp1, ExpNode exp2) {
+                        super(exp1, exp2);
+                    }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" * ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                    public void unparse(PrintWriter p, int indent) {
+                        p.print("(");
+                            myExp1.unparse(p, 0);
+                            p.print(" * ");
+                            myExp2.unparse(p, 0);
+                            p.print(")");
+                        }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                        public void analyzeName(){
+                            myExp1.analyzeName();
+                            myExp2.analyzeName();
+                        }
+                    }
 
-class DivideNode extends BinaryExpNode {
-    public DivideNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                    class DivideNode extends BinaryExpNode {
+                        public DivideNode(ExpNode exp1, ExpNode exp2) {
+                            super(exp1, exp2);
+                        }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" / ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                        public void unparse(PrintWriter p, int indent) {
+                            p.print("(");
+                                myExp1.unparse(p, 0);
+                                p.print(" / ");
+                                myExp2.unparse(p, 0);
+                                p.print(")");
+                            }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                            public void analyzeName(){
+                                myExp1.analyzeName();
+                                myExp2.analyzeName();
+                            }
+                        }
 
-class AndNode extends BinaryExpNode {
-    public AndNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                        class AndNode extends BinaryExpNode {
+                            public AndNode(ExpNode exp1, ExpNode exp2) {
+                                super(exp1, exp2);
+                            }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" && ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                            public void unparse(PrintWriter p, int indent) {
+                                p.print("(");
+                                    myExp1.unparse(p, 0);
+                                    p.print(" && ");
+                                    myExp2.unparse(p, 0);
+                                    p.print(")");
+                                }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                                public void analyzeName(){
+                                    myExp1.analyzeName();
+                                    myExp2.analyzeName();
+                                }
+                            }
 
-class OrNode extends BinaryExpNode {
-    public OrNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                            class OrNode extends BinaryExpNode {
+                                public OrNode(ExpNode exp1, ExpNode exp2) {
+                                    super(exp1, exp2);
+                                }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" || ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                                public void unparse(PrintWriter p, int indent) {
+                                    p.print("(");
+                                        myExp1.unparse(p, 0);
+                                        p.print(" || ");
+                                        myExp2.unparse(p, 0);
+                                        p.print(")");
+                                    }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                                    public void analyzeName(){
+                                        myExp1.analyzeName();
+                                        myExp2.analyzeName();
+                                    }
+                                }
 
-class EqualsNode extends BinaryExpNode {
-    public EqualsNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                                class EqualsNode extends BinaryExpNode {
+                                    public EqualsNode(ExpNode exp1, ExpNode exp2) {
+                                        super(exp1, exp2);
+                                    }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" == ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                                    public void unparse(PrintWriter p, int indent) {
+                                        p.print("(");
+                                            myExp1.unparse(p, 0);
+                                            p.print(" == ");
+                                            myExp2.unparse(p, 0);
+                                            p.print(")");
+                                        }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                                        public void analyzeName(){
+                                            myExp1.analyzeName();
+                                            myExp2.analyzeName();
+                                        }
+                                    }
 
-class NotEqualsNode extends BinaryExpNode {
-    public NotEqualsNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                                    class NotEqualsNode extends BinaryExpNode {
+                                        public NotEqualsNode(ExpNode exp1, ExpNode exp2) {
+                                            super(exp1, exp2);
+                                        }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" != ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                                        public void unparse(PrintWriter p, int indent) {
+                                            p.print("(");
+                                                myExp1.unparse(p, 0);
+                                                p.print(" != ");
+                                                myExp2.unparse(p, 0);
+                                                p.print(")");
+                                            }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                                            public void analyzeName(){
+                                                myExp1.analyzeName();
+                                                myExp2.analyzeName();
+                                            }
+                                        }
 
-class LessNode extends BinaryExpNode {
-    public LessNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                                        class LessNode extends BinaryExpNode {
+                                            public LessNode(ExpNode exp1, ExpNode exp2) {
+                                                super(exp1, exp2);
+                                            }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" < ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                                            public void unparse(PrintWriter p, int indent) {
+                                                p.print("(");
+                                                    myExp1.unparse(p, 0);
+                                                    p.print(" < ");
+                                                    myExp2.unparse(p, 0);
+                                                    p.print(")");
+                                                }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                                                public void analyzeName(){
+                                                    myExp1.analyzeName();
+                                                    myExp2.analyzeName();
+                                                }
+                                            }
 
-class GreaterNode extends BinaryExpNode {
-    public GreaterNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                                            class GreaterNode extends BinaryExpNode {
+                                                public GreaterNode(ExpNode exp1, ExpNode exp2) {
+                                                    super(exp1, exp2);
+                                                }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" > ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                                                public void unparse(PrintWriter p, int indent) {
+                                                    p.print("(");
+                                                        myExp1.unparse(p, 0);
+                                                        p.print(" > ");
+                                                        myExp2.unparse(p, 0);
+                                                        p.print(")");
+                                                    }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                                                    public void analyzeName(){
+                                                        myExp1.analyzeName();
+                                                        myExp2.analyzeName();
+                                                    }
+                                                }
 
-class LessEqNode extends BinaryExpNode {
-    public LessEqNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                                                class LessEqNode extends BinaryExpNode {
+                                                    public LessEqNode(ExpNode exp1, ExpNode exp2) {
+                                                        super(exp1, exp2);
+                                                    }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" <= ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                                                    public void unparse(PrintWriter p, int indent) {
+                                                        p.print("(");
+                                                            myExp1.unparse(p, 0);
+                                                            p.print(" <= ");
+                                                            myExp2.unparse(p, 0);
+                                                            p.print(")");
+                                                        }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                                                        public void analyzeName(){
+                                                            myExp1.analyzeName();
+                                                            myExp2.analyzeName();
+                                                        }
+                                                    }
 
-class GreaterEqNode extends BinaryExpNode {
-    public GreaterEqNode(ExpNode exp1, ExpNode exp2) {
-        super(exp1, exp2);
-    }
+                                                    class GreaterEqNode extends BinaryExpNode {
+                                                        public GreaterEqNode(ExpNode exp1, ExpNode exp2) {
+                                                            super(exp1, exp2);
+                                                        }
 
-    public void unparse(PrintWriter p, int indent) {
-        p.print("(");
-        myExp1.unparse(p, 0);
-        p.print(" >= ");
-        myExp2.unparse(p, 0);
-        p.print(")");
-    }
+                                                        public void unparse(PrintWriter p, int indent) {
+                                                            p.print("(");
+                                                                myExp1.unparse(p, 0);
+                                                                p.print(" >= ");
+                                                                myExp2.unparse(p, 0);
+                                                                p.print(")");
+                                                            }
 
-    public void analyzeName(){
-        myExp1.analyzeName();
-        myExp2.analyzeName();
-    }
-}
+                                                            public void analyzeName(){
+                                                                myExp1.analyzeName();
+                                                                myExp2.analyzeName();
+                                                            }
+                                                        }
