@@ -191,7 +191,6 @@ class FormalsListNode extends ASTnode {
     }
     public void analyzeName(){
         //scope entry
-        currScope++;
         symTblList.addScope();
         Iterator<FormalDeclNode> it = myFormals.iterator();
         while(it.hasNext()){
@@ -217,7 +216,6 @@ class FnBodyNode extends ASTnode {
         myStmtList.analyzeName();
         //exit scope
         symTbl.removeScope();
-        currScope--;
     }
     // 2 kids
     private DeclListNode myDeclList;
@@ -315,7 +313,7 @@ class VarDeclNode extends DeclNode {
     }
     //for var decls within a struct
     //Struct date d;
-    public void analyzeNameStruct(SymTable st){
+    public void analyzeNameStruct(){
         analyzeName();
         //struct date{ int year; int month; struct datetime dt;} 
         //name: year; sym: new Sym("date"); pass!
@@ -382,7 +380,6 @@ class FormalDeclNode extends DeclNode {
         myId.unparse(p, 0);
     }
     public void analyzeName(){    
-        myId.analyzeName();
         if(symTbl.lookupLocal(myId.getName()) != null){
             symTbl.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
         } //we don't have to deal with struct here because it is not allowed to be a param
