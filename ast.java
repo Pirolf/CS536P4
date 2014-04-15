@@ -367,6 +367,7 @@ class FnDeclNode extends DeclNode {
          ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
       }
       Sym s = new Sym(myType.getTypeNodeType());
+      myId.setSym(s);
       try {
          symTbl.addDecl(myId.toString(), s);
       } catch (DuplicateSymException e) {
@@ -880,12 +881,13 @@ class IdNode extends ExpNode {
 
 	public void unparse(PrintWriter p, int indent) {
 		p.print(myStrVal);
-      p.print("("+ mySym.getType() + ")");	
+      //p.print("("+ mySym.getType() + ")");	
 	}
 
    // has to override for abstract class...
 	public void analyzeName(){
-		return;
+		if (symTbl.lookupGlobal(myStrVal) == null)
+         ErrMsg.fatal(myLineNum, myCharNum, "Undeclared identifier");
 	}
 
 	public String toString(){

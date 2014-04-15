@@ -59,6 +59,7 @@ public class P4 {
         // if there are no errors so far
         // (either scanning, parsing, or name-analysis errors), it will call the unparser.
         
+        ((ProgramNode)root.value).analyzeName();
         ((ASTnode)root.value).unparse(outFile, 0);
         outFile.close();
 
