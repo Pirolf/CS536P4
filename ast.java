@@ -133,9 +133,8 @@ class ProgramNode extends ASTnode {
 		myDeclList.unparse(p, indent);
 	}
 
-	public void analyzeName() throws DuplicateSymException, EmptySymException{
+	public void analyzeName(){
 		symTbl = new SymTable();
-		currScope  = 0;
 		myDeclList.analyzeName();
 	}
 	// 1 kid
@@ -158,16 +157,20 @@ class DeclListNode extends ASTnode {
 			System.exit(-1);
 		}
 	}
-	public void analyzeName() throws DuplicateSymException, EmptySymException{
+	public void analyzeName(){
 		//scope entry
 		symTbl.addScope();
-
-		myDecls.analyzeName();
+        Iterator<DeclNode> it = myDecls.iterator();
+        while(it.hasNext()){
+            it.next().analyzeName();
+        }
 	}
 	public void analyzeNameStruct(SymTable st){
 		symTbl.addScope();
-
-		myDecls.analyzeNameStruct(st);
+        Iterator<DeclNode> it = myDecls.iterator();
+        while(it.hasNext()){
+            it.next().analyzeNameStruct();
+        }
 	}
 
 	// list of kids (DeclNodes)
@@ -189,9 +192,9 @@ class FormalsListNode extends ASTnode {
 			}
 		} 
 	}
-	public void analyzeName() throws DuplicateSymException, EmptySymException{
+	public void analyzeName(){
 		//scope entry
-		symTblList.addScope();
+		symTbl.addScope();
 		Iterator<FormalDeclNode> it = myFormals.iterator();
 		while(it.hasNext()){
 			it.next().analyzeName();
@@ -211,7 +214,7 @@ class FnBodyNode extends ASTnode {
 		myDeclList.unparse(p, indent);
 		myStmtList.unparse(p, indent);
 	}
-	public void analyzeName() throws DuplicateSymException, EmptySymException{
+	public void analyzeName(){
 		myDeclList.analyzeName();
 		myStmtList.analyzeName();
 		//exit scope
@@ -233,7 +236,7 @@ class StmtListNode extends ASTnode {
 			it.next().unparse(p, indent);
 		}
 	}
-	public void analyzeName() throws DuplicateSymException, EmptySymException{
+	public void analyzeName(){
 		Iterator<StmtNode> it = myStmts.iterator();
 		while (it.hasNext()) {
 			it.next().analyzeName();
@@ -258,7 +261,7 @@ class ExpListNode extends ASTnode {
 			}
 		} 
 	}
-	public void analyzeName() throws DuplicateSymException, EmptySymException{
+	public void analyzeName(){
 		Iterator<ExpNode> it = myExps.iterator();
 		while (it.hasNext()) {
 			it.next().analyzeName();
@@ -291,7 +294,7 @@ class VarDeclNode extends DeclNode {
 		myId.unparse(p, 0);
 		p.println(";");
 	}
-	public void analyzeName() throws DuplicateSymException, EmptySymException{
+	public void analyzeName(){
 		//eg. int ID; 
 		if(mySize == NOT_STRUCT){
 			if(symTbl.lookupLocal(myId.getName()) == null){
@@ -407,7 +410,7 @@ class StructDeclNode extends DeclNode {
 		p.println("};\n");
 
 	}
-	public void analyzeName() throws DuplicateSymException, EmptySymException{
+	public void analyzeName(){
 		//should also add to symtbl
 		//scope entry
 		if(structSymTbl == null){
@@ -443,7 +446,7 @@ class StructDeclNode extends DeclNode {
 		//scope exit: 
 		//structSymTbl.removeScope();
 		symTbl.lookupLocal(myId.getName());
-		symTbl.addDecl(myId.getName(), "struct");//name, type
+		symTbl.addDecl(myId.getName(), new Sym("struct"));//name, type
 	}
 	// 2 kids
 	private IdNode myId;
@@ -522,6 +525,7 @@ class StructNode extends TypeNode {
 // **********************************************************************
 
 abstract class StmtNode extends ASTnode {
+    abstract public void analyzeName();
 }
 
 class AssignStmtNode extends StmtNode {
@@ -631,7 +635,7 @@ class IfStmtNode extends StmtNode {
 	public void analyzeName(){
 		myExp.analyzeName();
 		//scope entry
-		currScope++;
+
 		symTbl.addScope();
 		Iterator<DeclListNode> itDLN = myDeclList.iterator();
 		while(itDLN.hasNext()){
@@ -679,28 +683,17 @@ class IfElseStmtNode extends StmtNode {
 	}
 	public void analyzeName(){
 		myExp.analyzeName();
-		Iterator<DeclListNode> itDThen = myThenDeclList.iterator();
-		Iterator<StmtListNode> itSThen = myThenStmtList.iterator();
-		Iterator<StmtListNode> itSElse = myElseStmtList.iterator();
-		Iterator<DeclListNode> itDElse = myElseDeclList.iterator();
 		//scope entry
 		symTbl.addScope();
-		while(itDThen.hasNext()){
-			itDThen.next().analyzeName();
-		}
-		while(itSThen.hasNext()){
-			itSThen.next().analyzeName();
-		}
+        itDThen.analyzeName();
+		itSThen.analyzeName();
+		
 		//scope exit: if
 		symTbl.removeScope();
 		//scope entry
 		symTbl.addScope();
-		while(itDElse.hasNext()){
-			itDElse.next().analyzeName();
-		}
-		while(itSElse.hasNext()){
-			itSElse.next().analyzeName();
-		}
+		itDElse.analyzeName();
+		itSElse.analyzeName();
 		//scope exit: else
 		symTbl.removeScope();
 	}
@@ -731,19 +724,9 @@ class WhileStmtNode extends StmtNode {
 	}
 	public void analyzeName(){
 		myExp.analyzeName();
-		Iterator<DeclListNode> itD = myDeclList.iterator();
-		Iterator<StmtListNode> itS = myStmtList.iterator();
-		//scope entry
-		currScope++;
-		symTbl.addScope();
-		while(itD.hasNext()){
-			itD.next().analyzeName();
-		}
-		while(itS.hasNext()){
-			itS.next().analyzeName();
-		}
-		//scope exit
-		currScope--;
+        symTbl.addScope();
+        myDeclList.analyzeName();
+        myStmtList.analyzeName();
 		symTbl.removeScope();
 	}
 	// 3 kids
@@ -795,6 +778,7 @@ class ReturnStmtNode extends StmtNode {
 // **********************************************************************
 
 abstract class ExpNode extends ASTnode {
+    abstract public void analyzeName();
 }
 
 class IntLitNode extends ExpNode {
@@ -951,7 +935,7 @@ class DotAccessExpNode extends ExpNode {
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
 			if(symTbl.lookupGlobal(myLoc.getName()) != null){
-				structSym = structSymTbl.lookupGlobal(myId.getName();
+				Sym structSym = structSymTbl.lookupGlobal(myId.getName());
 				if(structSym == null){
 					//throw exception
 				}else if(!structSym.getType().equals(myLoc.getName())){

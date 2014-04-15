@@ -8,7 +8,6 @@
 ###
 
 JC = javac
-
 P4.class: P4.java parser.class Yylex.class ASTnode.class
 	$(JC) -g P4.java
 

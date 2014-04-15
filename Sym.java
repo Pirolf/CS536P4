@@ -1,5 +1,5 @@
 import java.util.*;
-public class Sym {
+class Sym {
     private String type;
     public Sym(String type) {
         this.type = type;
@@ -14,7 +14,7 @@ public class Sym {
     }
 }
 
-public class SymFunc extends Sym{
+ class SymFunc extends Sym{
     private String retType;
     private List<Sym> params;
     public SymFunc(String retType, LinkedList<Sym> params){
@@ -26,11 +26,10 @@ public class SymFunc extends Sym{
     public String getRetType(){
         return retType;
     }
-    public LinkedList<Sym> getParams(){
+    public List<Sym> getParams(){
         return params;
     }
 
-    @override
     /*This should be used for debugging ONLY*/
     public String toString(){
         String retContent = "";
