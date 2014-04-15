@@ -309,6 +309,11 @@ class VarDeclNode extends DeclNode {
 	public void analyzeName(){
 		//eg. int ID; 
 		Sym s = new Sym(myType.getTypeNodeType());
+      if (s.getType() == "void"){
+         ErrMsg.fatal(myId.getLineNum(), myId.getCharNum(), "Non-function declared void");
+         return;
+      }
+
 		myId.setSym(s);
       
       // This will throw DuplicateSymException if already dcl'd in scope
