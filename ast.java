@@ -105,7 +105,7 @@ import java.util.*;
 // ASTnode class (base class for all other kinds of nodes)
 // **********************************************************************
 
-abstract class ASTnode { 
+abstract class ASTnode{ 
 	// every subclass must provide an unparse operation
 	abstract public void unparse(PrintWriter p, int indent);
 	// this method can be used by the unparse methods to do indenting
@@ -115,7 +115,7 @@ abstract class ASTnode {
 	//public static List<SymTable> symTblList() = new LinkedList<SymTable>();
 	public static SymTable symTbl;
 	public static SymTable structSymTbl;//for struct decls
-	public static int currScope;
+	//public static int currScope;
 }
 
 // **********************************************************************
@@ -133,7 +133,7 @@ class ProgramNode extends ASTnode {
 		myDeclList.unparse(p, indent);
 	}
 
-	public void analyzeName(){
+	public void analyzeName() throws DuplicateSymException, EmptySymException{
 		symTbl = new SymTable();
 		currScope  = 0;
 		myDeclList.analyzeName();
@@ -158,7 +158,7 @@ class DeclListNode extends ASTnode {
 			System.exit(-1);
 		}
 	}
-	public void analyzeName(){
+	public void analyzeName() throws DuplicateSymException, EmptySymException{
 		//scope entry
 		symTbl.addScope();
 
@@ -189,7 +189,7 @@ class FormalsListNode extends ASTnode {
 			}
 		} 
 	}
-	public void analyzeName(){
+	public void analyzeName() throws DuplicateSymException, EmptySymException{
 		//scope entry
 		symTblList.addScope();
 		Iterator<FormalDeclNode> it = myFormals.iterator();
@@ -211,7 +211,7 @@ class FnBodyNode extends ASTnode {
 		myDeclList.unparse(p, indent);
 		myStmtList.unparse(p, indent);
 	}
-	public void analyzeName(){
+	public void analyzeName() throws DuplicateSymException, EmptySymException{
 		myDeclList.analyzeName();
 		myStmtList.analyzeName();
 		//exit scope
@@ -233,7 +233,7 @@ class StmtListNode extends ASTnode {
 			it.next().unparse(p, indent);
 		}
 	}
-	public void analyzeName(){
+	public void analyzeName() throws DuplicateSymException, EmptySymException{
 		Iterator<StmtNode> it = myStmts.iterator();
 		while (it.hasNext()) {
 			it.next().analyzeName();
@@ -258,7 +258,7 @@ class ExpListNode extends ASTnode {
 			}
 		} 
 	}
-	public void analyzeName(){
+	public void analyzeName() throws DuplicateSymException, EmptySymException{
 		Iterator<ExpNode> it = myExps.iterator();
 		while (it.hasNext()) {
 			it.next().analyzeName();
@@ -291,14 +291,16 @@ class VarDeclNode extends DeclNode {
 		myId.unparse(p, 0);
 		p.println(";");
 	}
-	public void analyzeName(){
+	public void analyzeName() throws DuplicateSymException, EmptySymException{
 		//eg. int ID; 
 		if(mySize == NOT_STRUCT){
 			if(symTbl.lookupLocal(myId.getName()) == null){
 				Sym s = new Sym(myType.getTypeNodeType());
 				myId.setSym(s);
 				symTbl.addDecl(myId.getName(), s);
-			}
+			}else{
+               // throw DuplicateSymException(ErrMsg.multDecl());
+            }
 		}    
 		else{
 			//is struct: struct date d;
@@ -405,7 +407,7 @@ class StructDeclNode extends DeclNode {
 		p.println("};\n");
 
 	}
-	public void analyzeName(){
+	public void analyzeName() throws DuplicateSymException, EmptySymException{
 		//should also add to symtbl
 		//scope entry
 		if(structSymTbl == null){

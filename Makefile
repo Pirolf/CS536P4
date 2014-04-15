@@ -1,6 +1,6 @@
 ###
 # This Makefile can be used to make a parser for the CSX language
-# (parser.class) and to make a program (P3.class) that tests the parser and
+# (parser.class) and to make a program (P4.class) that tests the parser and
 # the unparse methods in ast.java.
 #
 # make clean removes all generated files.
@@ -10,7 +10,7 @@
 JC = javac
 
 P4.class: P4.java parser.class Yylex.class ASTnode.class
-	$(JC) -g P3.java
+	$(JC) -g P4.java
 
 parser.class: parser.java ASTnode.class Yylex.class ErrMsg.class
 	$(JC) parser.java

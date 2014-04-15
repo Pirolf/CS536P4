@@ -17,28 +17,28 @@ class ErrMsg {
     }
     */
     //The first character of the ID in the duplicate declaration
-    static void multDecl(int lineNum, int charNum){
-        System.err.println(lineNum + ":" + charNum + " ***ERROR*** " + "Multiply declared identifier");
+    static String multDecl(int lineNum, int charNum){
+        return (lineNum + ":" + charNum + " ***ERROR*** " + "Multiply declared identifier");
     }
     //  The first character of the undeclared identifier
-    static void useOfUndeclID(int lineNum, int charNum){
-        System.err.println(lineNum + ":" + charNum + " ***ERROR*** " + "Undeclared identifier");
+    static String useOfUndeclID(int lineNum, int charNum){
+        return (lineNum + ":" + charNum + " ***ERROR*** " + "Undeclared identifier");
     }
     //The first character of the ID corresponding to the LHS of the dot-access.
-    static void badStructAccessLHS(int lineNum, int charNum){
-        System.err.println(lineNum + ":" + charNum + " ***ERROR*** " + "Dot-access of non-struct type");
+    static String badStructAccessLHS(int lineNum, int charNum){
+        return (lineNum + ":" + charNum + " ***ERROR*** " + "Dot-access of non-struct type");
     }
     //The first character of the ID corresponding to the RHS of the dot-access.
-    static void badStructAccessRHS(int lineNum, int charNum){
-        System.err.println(lineNum + ":" + charNum + " ***ERROR*** " + "Invalid struct field name");
+    static String badStructAccessRHS(int lineNum, int charNum){
+        return (lineNum + ":" + charNum + " ***ERROR*** " + "Invalid struct field name");
     }
     //The first character of the ID in the bad declaration.
-    static void badVoidDecl(int lineNum, int charNum){
-        System.err.println(lineNum + ":" + charNum + " ***ERROR*** " + "Non-function declared void");
+    static String badVoidDecl(int lineNum, int charNum){
+        return (lineNum + ":" + charNum + " ***ERROR*** " + "Non-function declared void");
     }
     //The first character of the ID corresponding to the struct type in the bad declaration.
-    static void badStructDecl(int lineNum, int charNum){
-        System.err.println(lineNum + ":" + charNum + " ***ERROR*** " + "Invalid name of struct type");
+    static String badStructDecl(int lineNum, int charNum){
+        return (lineNum + ":" + charNum + " ***ERROR*** " + "Invalid name of struct type");
     }
     
 
