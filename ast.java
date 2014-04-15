@@ -165,7 +165,7 @@ class DeclListNode extends ASTnode {
             it.next().analyzeName();
         }
 	}
-	public void analyzeNameStruct(SymTable st){
+	public void analyzeNameStruct(){
 		symTbl.addScope();
         Iterator<DeclNode> it = myDecls.iterator();
         while(it.hasNext()){
@@ -419,7 +419,7 @@ class StructDeclNode extends DeclNode {
 			structSymTbl.addScope();
 		}
 
-		myDeclList.analyzeNameStruct(structSymTbl);
+		myDeclList.analyzeNameStruct();
 		// Iterator<DeclListNode> it = myDeclList.iterator();
 
 		// while(it.hasNext()){
