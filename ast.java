@@ -112,7 +112,7 @@ abstract class ASTnode {
     protected void doIndent(PrintWriter p, int indent) {
         for (int k=0; k<indent; k++) p.print(" ");
     }
-    public static List<SymTable> symTblList() = new LinkedList<SymTable>();
+    public static List<SymTable> symTblList = new LinkedList<SymTable>();
     public static int currScope = 0;
 }
 
