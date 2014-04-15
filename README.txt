@@ -10,3 +10,11 @@ Partner 1 CS Login: ytu
 
 Partner 2     Name: Stephen Sturdevant
 Partner 2 CS Login: sturdeva
+
+
+Change Log:
+----------
+(SMS): Adding a test commit 
+
+
+
