@@ -878,25 +878,10 @@ class IdNode extends ExpNode {
 
 	}
 
-	public void analyzeName(){
-		//DO WE NEED THIS AT ALL? YES?
-		//I AM CONFUSED
-		//NO
-		/*
-        if(symTbl.lookupLocal(myStrVal) == null){
-            mySym = new Sym();
-            symTbl.addDecl(myStrVal, mySym);
-        }
-		 */
-		//yes, when id is exp: check if declared globally
-		if(symTbl.lookupGlobal(myStrVal) == null){
-			//throw excp
-		}
-
-	}
-	public void analyzeNameStruct(SymTable st){
-		//look up locally
-	}
+	public String toString(){
+        return myStrVal;
+    }
+	
 	public Sym getSym(){
 		return mySym;
 	}
