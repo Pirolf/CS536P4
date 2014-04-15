@@ -440,7 +440,7 @@ class StructDeclNode extends DeclNode {
 
         //scope exit: 
         //structSymTbl.removeScope();
-            symTbl.lookupLocal(myId.getName());
+        symTbl.lookupLocal(myId.getName());
         symTbl.addDecl(myId.getName(), "struct");//name, type
     }
     // 2 kids
@@ -640,7 +640,6 @@ class IfStmtNode extends StmtNode {
                 itSLN.next().analyzeName();
             }
         //scope exit
-            currScope--
             symTbl.removeScope();
         }
     // e kids
@@ -683,7 +682,6 @@ class IfStmtNode extends StmtNode {
                 Iterator<StmtListNode> itSElse = myElseStmtList.iterator();
                 Iterator<DeclListNode> itDElse = myElseDeclList.iterator();
         //scope entry
-                currScope++;
                 symTbl.addScope();
                 while(itDThen.hasNext()){
                     itDThen.next().analyzeName();
@@ -692,10 +690,8 @@ class IfStmtNode extends StmtNode {
                     itSThen.next().analyzeName();
                 }
         //scope exit: if
-                currScope--;
                 symTbl.removeScope();
         //scope entry
-                currScope++;
                 symTbl.addScope();
                 while(itDElse.hasNext()){
                     itDElse.next().analyzeName();
@@ -704,7 +700,6 @@ class IfStmtNode extends StmtNode {
                     itSElse.next().analyzeName();
                 }
         //scope exit: else
-                currScope--;
                 symTbl.removeScope();
             }
     // 5 kids
@@ -810,7 +805,9 @@ class IntLitNode extends ExpNode {
     public void unparse(PrintWriter p, int indent) {
         p.print(myIntVal);
     }
-
+    public void analyzeName(){
+        return;
+    }
     private int myLineNum;
     private int myCharNum;
     private int myIntVal;
@@ -826,7 +823,9 @@ class StringLitNode extends ExpNode {
     public void unparse(PrintWriter p, int indent) {
         p.print(myStrVal);
     }
-
+    public void analyzeName(){
+        return;
+    }
     private int myLineNum;
     private int myCharNum;
     private String myStrVal;
@@ -841,7 +840,9 @@ class TrueNode extends ExpNode {
     public void unparse(PrintWriter p, int indent) {
         p.print("true");
     }
-
+    public void analyzeName(){
+        return;
+    }
     private int myLineNum;
     private int myCharNum;
 }
@@ -855,7 +856,9 @@ class FalseNode extends ExpNode {
     public void unparse(PrintWriter p, int indent) {
         p.print("false");
     }
-
+    public void analyzeName(){
+        return;
+    }
     private int myLineNum;
     private int myCharNum;
 }
@@ -889,7 +892,7 @@ class IdNode extends ExpNode {
 
         }
 
-        public void analyzeName(){
+    public void analyzeName(){
         //DO WE NEED THIS AT ALL? YES?
         //I AM CONFUSED
         //NO
@@ -899,15 +902,18 @@ class IdNode extends ExpNode {
             symTbl.addDecl(myStrVal, mySym);
         }
         */
+        //yes, when id is exp: check if declared globally
+        if(symTbl.lookupGlobal(myStrVal) == null){
+            //throw excp
+        }
+
     }
     public void analyzeNameStruct(SymTable st){
         //look up locally
-
     }
     public Sym getSym(){
         return mySym;
     }
-
     public void setSym(Sym s){
         mySym = s;
     }
@@ -936,27 +942,27 @@ class DotAccessExpNode extends ExpNode {
             p.print(").");
             myId.unparse(p, 0);
         }
-        public void analyzeName(){
+    public void analyzeName(){
         //base case
-            if(myLoc instanceof IdNode){
+        if(myLoc instanceof IdNode){
             //s1.s2.s3
             //check if myLoc is struct: lookup global in symTbl
             //look up in structSymTbl: is myId a field of the struct
-                if(symTbl.lookupGlobal(myLoc.getName()) != null){
-                    structSym = structSymTbl.lookupGlobal(myId.getName();
-                    if(structSym == null){
-                        //throw exception
-                    }else if(!structSym.getType().equals(myLoc.getName())){
-                        //throw exception
-                    }
-                }else{
+            if(symTbl.lookupGlobal(myLoc.getName()) != null){
+                structSym = structSymTbl.lookupGlobal(myId.getName();
+                if(structSym == null){
+                    //throw exception
+                }else if(!structSym.getType().equals(myLoc.getName())){
                     //throw exception
                 }
-            }else if(myLoc instanceof ExpNode){
-                myLoc.analyzeName();
+            }else{
+                    //throw exception
             }
-
+        }else if(myLoc instanceof ExpNode){
+            myLoc.analyzeName();
         }
+
+    }
     // 2 kids
         private ExpNode myLoc;    
         private IdNode myId;
@@ -974,26 +980,26 @@ class DotAccessExpNode extends ExpNode {
                 p.print(" = ");
                 myExp.unparse(p, 0);
                 if (indent != -1)  p.print(")");
-            }
-            public void analyzeName(){
+        }
+        public void analyzeName(){
                 myLhs.analyzeName();
                 myExp.analyzeName();
-            }
+        }
     // 2 kids
             private ExpNode myLhs;
             private ExpNode myExp;
-        }
+    }
 
-        class CallExpNode extends ExpNode {
-            public CallExpNode(IdNode name, ExpListNode elist) {
+    class CallExpNode extends ExpNode {
+         public CallExpNode(IdNode name, ExpListNode elist) {
                 myId = name;
                 myExpList = elist;
-            }
+        }
 
-            public CallExpNode(IdNode name) {
+        public CallExpNode(IdNode name) {
                 myId = name;
                 myExpList = new ExpListNode(new LinkedList<ExpNode>());
-            }
+        }
 
     // ** unparse **
             public void unparse(PrintWriter p, int indent) {
@@ -1006,7 +1012,10 @@ class DotAccessExpNode extends ExpNode {
                 }
                 public void analyzeName(){
                     myId.analyzeName();
-                    myExpList.analyzeName();
+                    if(myExpList != null){
+                      myExpList.analyzeName();  
+                    }
+                    
                 }
     // 2 kids
                 private IdNode myId;
