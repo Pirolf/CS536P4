@@ -358,12 +358,10 @@ class FnDeclNode extends DeclNode {
 		p.println("}\n");
 	}
 	public void analyzeName(){       
-		myId.analyzeName();
-		myType.analyzeName();
-		Iterator<FormalsListNode> it = myFormalsList.iterator();
-		while(it.hasNext()){
-			it.next().analyzeName();
-		}
+		//myId.analyzeName();
+		//myType.analyzeName();
+        //TODO
+		myFormalsList.analyzeName();
 		myBody.analyzeName();
 	}
 	// 4 kids
@@ -458,6 +456,7 @@ class StructDeclNode extends DeclNode {
 // **********************************************************************
 
 abstract class TypeNode extends ASTnode {
+    abstract public String getTypeNodeType();
 }
 
 class IntNode extends TypeNode {
@@ -870,7 +869,7 @@ class IdNode extends ExpNode {
 					p.print(", " + paramItr.next().getType());
 				}
 			}
-			p.print("->" + mySym.getRetType());
+			p.print("->" + ((SymFunc)mySym).getRetType());
 			p.print(")");
 		}else{
 			p.print("("+ mySym.getType() + ")");
@@ -1000,6 +999,7 @@ abstract class UnaryExpNode extends ExpNode {
 
 	// one child
 	protected ExpNode myExp;
+    abstract public void analyzeName();
 }
 
 abstract class BinaryExpNode extends ExpNode {
@@ -1010,6 +1010,7 @@ abstract class BinaryExpNode extends ExpNode {
 	// two kids
 	protected ExpNode myExp1;
 	protected ExpNode myExp2;
+    abstract public void analyzeName();
 }
 
 // **********************************************************************
