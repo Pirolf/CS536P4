@@ -39,4 +39,4 @@ ErrMsg.class: ErrMsg.java
 # clean
 ###
 clean:
-	rm -f *~ *.class parser.java CSX.jlex.java Sym.java
+	rm -f *~ *.class parser.java CSX.jlex.java
