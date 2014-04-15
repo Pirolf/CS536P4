@@ -452,31 +452,6 @@ class StructDeclNode extends DeclNode {
          int cn = myId.getCharNum();
          ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
       }
-		// Iterator<DeclListNode> it = myDeclList.iterator();
-
-		// while(it.hasNext()){
-		//The fields of a struct must be unique to 
-		//that particular struct; 
-		//however, they can be a name that has been declared
-		//outside of the struct definition
-		/*
-            //Is this allowed?
-            struct date{
-                int year;
-            };
-            struct date2{
-                int year;
-            };
-		 */
-		//look up local
-		//DeclListNode currNode = it.next();
-		//add decl
-		// currNode.analyzeName();
-		//}
-
-
-		//scope exit: 
-		//structSymTbl.removeScope();
 	}
 	// 2 kids
 	private IdNode myId;
@@ -488,7 +463,7 @@ class StructDeclNode extends DeclNode {
 // **********************************************************************
 
 abstract class TypeNode extends ASTnode {
-   abstract public String getTypeNodeType();
+    abstract public String getTypeNodeType();
 }
 
 class IntNode extends TypeNode {
@@ -905,7 +880,7 @@ class IdNode extends ExpNode {
 
 	public void unparse(PrintWriter p, int indent) {
 		p.print(myStrVal);
-      p.print("("+ mySym.getType() + ")");
+      p.print("("+ mySym.getType() + ")");	
 	}
 
    // has to override for abstract class...
@@ -1054,6 +1029,7 @@ abstract class UnaryExpNode extends ExpNode {
 
 	// one child
 	protected ExpNode myExp;
+    abstract public void analyzeName();
 }
 
 abstract class BinaryExpNode extends ExpNode {
@@ -1064,6 +1040,7 @@ abstract class BinaryExpNode extends ExpNode {
 	// two kids
 	protected ExpNode myExp1;
 	protected ExpNode myExp2;
+    abstract public void analyzeName();
 }
 
 // **********************************************************************
