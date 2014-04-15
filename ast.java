@@ -942,25 +942,40 @@ class DotAccessExpNode extends ExpNode {
 			//s1.s2.s3
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
-         Sym structSym = symTbl.lookupGlobal(myLoc.toString());
-			if(structSym != null){
-				Sym curr = structSym;
-            while (curr.getType() == "struct") {
-               SymTable ssym = (SymTable) structSym.getData();
-               ssym.lookupGlobal(myId.toString());
-				   if(structSym == null){
-				   	//throw exception
-				   }else if(!structSym.getType().equals(myLoc.toString())){
-				   	//throw exception
-				   }
-			      else{
-				      //throw exception
-			      } 
-            }
-         } else if(myLoc instanceof ExpNode){
-            myLoc.analyzeName();
-         }
-	   }
+         	Sym curr = symTbl.lookupGlobal(myLoc.toString());
+			if(curr != null){
+            	if((curr.getType()).equals("struct")) {
+               		SymTable ssym = (SymTable) curr.getData();
+               		Sym structField = ssym.lookupGlobal(myId.toString());
+				   	if(structField == null){
+				   	//RHS of dot-access is not a field of the appropriate a struct
+				   		int ln = myId.getLineNum();
+         				int cn = myId.getCharNum();
+         				ErrMsg.fatal(ln, cn, "Dot-access of non-struct type");
+				  	}else if(!structField.getType().equals(myLoc.toString())){
+				   	//duplicate decl in struct like: int a; bool a;
+				  		int ln = myId.getLineNum();
+         				int cn = myId.getCharNum();
+         				ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+				   	}else{
+				      //no error
+				   		return;
+			      	} 
+           	   }else{
+           	   		//LHS not struct
+           	   		int leftln = ((IdNode)myLoc).getLineNum();
+         			int leftcn = ((IdNode)myLoc).getCharNum();
+         			ErrMsg.fatal(leftln, leftcn, "Invalid struct field name");
+           	   }
+        	}else{
+        		//structSym(curr) is null: undeclared
+        		int structNameln = ((IdNode)myLoc).getLineNum();
+         		int structNamecn = ((IdNode)myLoc).getCharNum();
+         		ErrMsg.fatal(structNameln, structNamecn, "Undeclared identifier");
+        	}
+	   }else if(myLoc instanceof ExpNode){
+           	 	myLoc.analyzeName();
+       }
    }
 	// 2 kids
 	private ExpNode myLoc;    
