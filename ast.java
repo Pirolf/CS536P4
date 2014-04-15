@@ -935,14 +935,7 @@ class DotAccessExpNode extends ExpNode {
 			//s1.s2.s3
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
-         Sym structSym = null;
-         try {
-            structSym = symTbl.lookupGlobal(myLoc.toString());
-         } catch (EmptySymTableException e) {
-            int ln = 0;
-            int cn = 0;
-            ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
-         }
+         Sym structSym = symTbl.lookupGlobal(myLoc.toString());
 			if(structSym != null){
 				Sym curr = structSym;
             while (curr.getType() == "struct") {
@@ -953,21 +946,20 @@ class DotAccessExpNode extends ExpNode {
 				   }else if(!structSym.getType().equals(myLoc.toString())){
 				   	//throw exception
 				   }
-			      }else{
+			      else{
 				      //throw exception
-			      }
-               
+			      } 
             }
-		}else if(myLoc instanceof ExpNode){
-			myLoc.analyzeName();
-		}
-
-	}
+         } else if(myLoc instanceof ExpNode){
+            myLoc.analyzeName();
+         }
+	   }
+   }
 	// 2 kids
 	private ExpNode myLoc;    
 	private IdNode myId;
+   
 }
-
 class AssignNode extends ExpNode {
 	public AssignNode(ExpNode lhs, ExpNode exp) {
 		myLhs = lhs;
