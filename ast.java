@@ -112,10 +112,8 @@ abstract class ASTnode{
 	protected void doIndent(PrintWriter p, int indent) {
 		for (int k=0; k<indent; k++) p.print(" ");
 	}
-	//public static List<SymTable> symTblList() = new LinkedList<SymTable>();
+   
 	public static SymTable symTbl;
-	public static SymTable structSymTbl;//for struct decls
-	//public static int currScope;
 }
 
 // **********************************************************************
@@ -158,21 +156,13 @@ class DeclListNode extends ASTnode {
 		}
 	}
 	public void analyzeName(){
-		//scope entry
-		symTbl.addScope();
-        Iterator<DeclNode> it = myDecls.iterator();
-        while(it.hasNext()){
-            it.next().analyzeName();
-        }
+      for (DeclNode n : myDecls)
+         n.analyzeName();
 	}
-	public void analyzeNameStruct(){
-		symTbl.addScope();
-        Iterator<DeclNode> it = myDecls.iterator();
-        while(it.hasNext()){
-            it.next().analyzeNameStruct();
-        }
-	}
-
+   public void analyzeName(SymTable tbl) {
+      for (DeclNode n : myDecls)
+         n.analyzeName(tbl);
+   }
 	// list of kids (DeclNodes)
 	private List<DeclNode> myDecls;
 }
@@ -195,10 +185,8 @@ class FormalsListNode extends ASTnode {
 	public void analyzeName(){
 		//scope entry
 		symTbl.addScope();
-		Iterator<FormalDeclNode> it = myFormals.iterator();
-		while(it.hasNext()){
-			it.next().analyzeName();
-		}
+      for (FormalDeclNode n : myFormals)
+         n.analyzeName();
 	}
 	// list of kids (FormalDeclNodes)
 	private List<FormalDeclNode> myFormals;
@@ -217,8 +205,6 @@ class FnBodyNode extends ASTnode {
 	public void analyzeName(){
 		myDeclList.analyzeName();
 		myStmtList.analyzeName();
-		//exit scope
-		symTbl.removeScope();
 	}
 	// 2 kids
 	private DeclListNode myDeclList;
@@ -237,10 +223,8 @@ class StmtListNode extends ASTnode {
 		}
 	}
 	public void analyzeName(){
-		Iterator<StmtNode> it = myStmts.iterator();
-		while (it.hasNext()) {
-			it.next().analyzeName();
-		}
+      for (StmtNode n : myStmts)
+         n.analyzeName();
 	}
 	// list of kids (StmtNodes)
 	private List<StmtNode> myStmts;
@@ -262,10 +246,8 @@ class ExpListNode extends ASTnode {
 		} 
 	}
 	public void analyzeName(){
-		Iterator<ExpNode> it = myExps.iterator();
-		while (it.hasNext()) {
-			it.next().analyzeName();
-		}
+      for (ExpNode n : myExps)
+         n.analyzeName();
 	}
 
 	// list of kids (ExpNodes)
@@ -277,7 +259,36 @@ class ExpListNode extends ASTnode {
 // **********************************************************************
 
 abstract class DeclNode extends ASTnode {
-	abstract public void analyzeName();
+	public void analyzeName() {
+      Sym s = new Sym(myType.getTypeNodeType());
+      try {
+         symTbl.addDecl(myId.toString(), s);
+      } catch (DuplicateSymException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+      } catch (EmptySymTableException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
+   }
+	public void analyzeName(SymTable tbl) {
+      Sym s = new Sym(myType.getTypeNodeType());
+      try {
+         tbl.addDecl(myId.toString(), s);
+      } catch (DuplicateSymException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+      } catch (EmptySymTableException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
+   }
+	private TypeNode myType;
+	private IdNode myId;
 }
 
 class VarDeclNode extends DeclNode {
@@ -294,39 +305,26 @@ class VarDeclNode extends DeclNode {
 		myId.unparse(p, 0);
 		p.println(";");
 	}
+
 	public void analyzeName(){
 		//eg. int ID; 
-		if(mySize == NOT_STRUCT){
-			if(symTbl.lookupLocal(myId.getName()) == null){
-				Sym s = new Sym(myType.getTypeNodeType());
-				myId.setSym(s);
-				symTbl.addDecl(myId.getName(), s);
-			}else{
-               // throw DuplicateSymException(ErrMsg.multDecl());
-            }
-		}    
-		else{
-			//is struct: struct date d;
-			Sym s = new Sym(myType.getTypeNodeType());//Sym("date");
-			myId.setSym(s);
-			if(symTbl.lookupglobal(myType.getTypeNodeType()) != null){
-				//date has been declared
-				symTbl.addDecl(myId.getName(), s);//name:d, type:date
-			}
-		}
-
+		Sym s = new Sym(myType.getTypeNodeType());
+		myId.setSym(s);
+      
+      // This will throw DuplicateSymException if already dcl'd in scope
+      try {
+         symTbl.addDecl(myId.toString(), s);
+      } catch (DuplicateSymException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+      } catch (EmptySymTableException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
 	}
-	//for var decls within a struct
-	//Struct date d;
-	public void analyzeNameStruct(){
-		analyzeName();
-		//struct date{ int year; int month; struct datetime dt;} 
-		//name: year; sym: new Sym("date"); pass!
-		//name: month; sym: new Sym("date"); pass!
-		//name: dt; sym: new Sym('dt'); pass!
-		structSymTbl.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
 
-	}
 	// 3 kids
 	private TypeNode myType;
 	private IdNode myId;
@@ -358,13 +356,28 @@ class FnDeclNode extends DeclNode {
 		p.println("}\n");
 	}
 	public void analyzeName(){       
-		myId.analyzeName();
-		myType.analyzeName();
-		Iterator<FormalsListNode> it = myFormalsList.iterator();
-		while(it.hasNext()){
-			it.next().analyzeName();
-		}
+      symTbl.addScope();
+      myFormalsList.analyzeName();
 		myBody.analyzeName();
+      try {
+         symTbl.removeScope();
+      } catch (EmptySymTableException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
+      Sym s = new Sym(myType.getTypeNodeType());
+      try {
+         symTbl.addDecl(myId.toString(), s);
+      } catch (DuplicateSymException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+      } catch (EmptySymTableException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
 	}
 	// 4 kids
 	private TypeNode myType;
@@ -385,9 +398,19 @@ class FormalDeclNode extends DeclNode {
 		myId.unparse(p, 0);
 	}
 	public void analyzeName(){    
-		if(symTbl.lookupLocal(myId.getName()) != null){
-			symTbl.addDecl(myId.getName(), new Sym(myType.getTypeNodeType()));
-		} //we don't have to deal with struct here because it is not allowed to be a param
+      try {
+         symTbl.addDecl(myId.toString(), new Sym(myType.getTypeNodeType()));
+      } catch (DuplicateSymException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+      } catch (EmptySymTableException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
+         
+		//we don't have to deal with struct here because it is not allowed to be a param
 	}
 	// 2 kids
 	private TypeNode myType;
@@ -413,13 +436,22 @@ class StructDeclNode extends DeclNode {
 	public void analyzeName(){
 		//should also add to symtbl
 		//scope entry
-		if(structSymTbl == null){
-			structSymTbl = new SymTable();
-		}else{
-			structSymTbl.addScope();
-		}
-
-		myDeclList.analyzeNameStruct();
+		SymTable strctTable = new SymTable();
+      myDeclList.analyzeName(strctTable);
+		symTbl.lookupLocal(myId.toString());
+      Sym s = new Sym("struct");
+      s.setData(strctTable);
+      try {
+         symTbl.addDecl(myId.toString(), s);
+      } catch (DuplicateSymException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+      } catch (EmptySymTableException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
 		// Iterator<DeclListNode> it = myDeclList.iterator();
 
 		// while(it.hasNext()){
@@ -445,8 +477,6 @@ class StructDeclNode extends DeclNode {
 
 		//scope exit: 
 		//structSymTbl.removeScope();
-		symTbl.lookupLocal(myId.getName());
-		symTbl.addDecl(myId.getName(), new Sym("struct"));//name, type
 	}
 	// 2 kids
 	private IdNode myId;
@@ -458,6 +488,7 @@ class StructDeclNode extends DeclNode {
 // **********************************************************************
 
 abstract class TypeNode extends ASTnode {
+   abstract public String getTypeNodeType();
 }
 
 class IntNode extends TypeNode {
@@ -513,7 +544,7 @@ class StructNode extends TypeNode {
 	}
 
 	public String getTypeNodeType(){
-		return myId.getName();
+		return myId.toString();
 	}
 	//TODO
 	// 1 kid
@@ -635,18 +666,17 @@ class IfStmtNode extends StmtNode {
 	public void analyzeName(){
 		myExp.analyzeName();
 		//scope entry
-
 		symTbl.addScope();
-		Iterator<DeclListNode> itDLN = myDeclList.iterator();
-		while(itDLN.hasNext()){
-			itDLN.next().analyzeName();
-		}
-		Iterator<StmtListNode> itSLN = myStmtList.iterator();
-		while(itSLN.hasNext()){
-			itSLN.next().analyzeName();
-		}
+      myDeclList.analyzeName();
+      myStmtList.analyzeName();
 		//scope exit
-		symTbl.removeScope();
+      try {
+         symTbl.removeScope();
+      } catch (EmptySymTableException e) {
+         int ln = 0;
+         int cn = 0;
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
 	}
 	// e kids
 	private ExpNode myExp;
@@ -685,17 +715,28 @@ class IfElseStmtNode extends StmtNode {
 		myExp.analyzeName();
 		//scope entry
 		symTbl.addScope();
-        itDThen.analyzeName();
-		itSThen.analyzeName();
-		
+      myThenDeclList.analyzeName();
+		myThenStmtList.analyzeName();
 		//scope exit: if
-		symTbl.removeScope();
+      try {
+         symTbl.removeScope();
+      } catch (EmptySymTableException e) {
+         int ln = 0;
+         int cn = 0;
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
 		//scope entry
 		symTbl.addScope();
-		itDElse.analyzeName();
-		itSElse.analyzeName();
+		myElseDeclList.analyzeName();
+		myElseStmtList.analyzeName();
 		//scope exit: else
-		symTbl.removeScope();
+      try {
+         symTbl.removeScope();
+      } catch (EmptySymTableException e) {
+         int ln = 0;
+         int cn = 0;
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
 	}
 	// 5 kids
 	private ExpNode myExp;
@@ -724,10 +765,16 @@ class WhileStmtNode extends StmtNode {
 	}
 	public void analyzeName(){
 		myExp.analyzeName();
-        symTbl.addScope();
-        myDeclList.analyzeName();
-        myStmtList.analyzeName();
-		symTbl.removeScope();
+      symTbl.addScope();
+      myDeclList.analyzeName();
+      myStmtList.analyzeName();
+		try {
+         symTbl.removeScope();
+      } catch (EmptySymTableException e) {
+         int ln = 0;
+         int cn = 0;
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
 	}
 	// 3 kids
 	private ExpNode myExp;
@@ -858,39 +905,33 @@ class IdNode extends ExpNode {
 
 	public void unparse(PrintWriter p, int indent) {
 		p.print(myStrVal);
-		if(mySym.getType().equals("function")){
-			List<Sym> myParams = mySym.getParams();
-			//param1Type, param2Type, ..., paramNType -> returnType
-			p.print("(");
-			Iterator<Sym> paramItr = myParams.iterator();
+      p.print("("+ mySym.getType() + ")");
+	}
 
-			if(paramItr.hasNext()){
-				p.print(paramItr.next().getType());
-				while(paramItr.hasNext()){
-					p.print(", " + paramItr.next().getType());
-				}
-			}
-			p.print("->" + mySym.getRetType());
-			p.print(")");
-		}else{
-			p.print("("+ mySym.getType() + ")");
-		}
-
+   // has to override for abstract class...
+	public void analyzeName(){
+		return;
 	}
 
 	public String toString(){
-        return myStrVal;
-    }
+      return myStrVal;
+   }
 	
 	public Sym getSym(){
 		return mySym;
 	}
+
 	public void setSym(Sym s){
 		mySym = s;
 	}
-	public String getName(){
-		return myStrVal;
-	}
+
+   public int getLineNum() {
+      return myLineNum;
+   }
+
+   public int getCharNum() {
+      return myCharNum;
+   }
 	private int myLineNum;
 	private int myCharNum;
 	private String myStrVal;
@@ -919,16 +960,29 @@ class DotAccessExpNode extends ExpNode {
 			//s1.s2.s3
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
-			if(symTbl.lookupGlobal(myLoc.getName()) != null){
-				Sym structSym = structSymTbl.lookupGlobal(myId.getName());
-				if(structSym == null){
-					//throw exception
-				}else if(!structSym.getType().equals(myLoc.getName())){
-					//throw exception
-				}
-			}else{
-				//throw exception
-			}
+         Sym structSym = null;
+         try {
+            structSym = symTbl.lookupGlobal(myLoc.toString());
+         } catch (EmptySymTableException e) {
+            int ln = 0;
+            int cn = 0;
+            ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+         }
+			if(structSym != null){
+				Sym curr = structSym;
+            while (curr.getType() == "struct") {
+               SymTable ssym = (SymTable) structSym.getData();
+               ssym.lookupGlobal(myId.toString());
+				   if(structSym == null){
+				   	//throw exception
+				   }else if(!structSym.getType().equals(myLoc.toString())){
+				   	//throw exception
+				   }
+			      }else{
+				      //throw exception
+			      }
+               
+            }
 		}else if(myLoc instanceof ExpNode){
 			myLoc.analyzeName();
 		}
