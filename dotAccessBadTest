@@ -29,4 +29,6 @@ void foo(){
 	s.xyz = 2;
 	s.testStruct2.t = 5;
 }
+//Undeclared identifier
+k = 1;
 
