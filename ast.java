@@ -356,7 +356,29 @@ class FnDeclNode extends DeclNode {
 		myBody.unparse(p, indent+4);
 		p.println("}\n");
 	}
-	public void analyzeName(SymTable tbl){       
+	public void analyzeName(SymTable tbl){  
+	  Sym dupFunc = null;
+	   try {
+         dupFunc = tbl.lookupGlobal(myId.toString());
+         /*
+         if(dupFunc == null){
+         	System.out.println("dupFunc is null");
+         }else{
+         	System.out.println(dupFunc.getType() + "dupFunc is NOT null");
+         }
+         */
+         
+         if(dupFunc != null){
+         	//tbl.addDecl(myId.toString(), s);
+
+         	throw new DuplicateSymException();
+         }
+         //tbl.addDecl(myId.toString(), s);
+      } catch (DuplicateSymException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+      }   
       tbl.addScope();
       myFormalsList.analyzeName(tbl);
 	  myBody.analyzeName(tbl);
@@ -374,32 +396,23 @@ class FnDeclNode extends DeclNode {
 
 
       myId.setSym(s);
-     // System.out.println("Type: " + s.getType() + ", Name: " + myId.toString());
-      try {
-         Sym dupFunc = tbl.lookupGlobal(myId.toString());
-         /*
-         if(dupFunc == null){
-         	System.out.println("dupFunc is null");
-         }else{
-         	System.out.println(dupFunc.getType() + "dupFunc is NOT null");
-         }
-         */
-         
-         if(dupFunc != null){
-         	//tbl.addDecl(myId.toString(), s);
+      if(dupFunc == null){
+      	 try{
+      	 	tbl.addDecl(myId.toString(), s);
+      	 }catch(DuplicateSymException e){
+      	 	int ln = myId.getLineNum();
+        	int cn = myId.getCharNum();
+         	ErrMsg.fatal(ln, cn, "Multiply declared identifier");
 
-         	throw new DuplicateSymException();
-         }
-         tbl.addDecl(myId.toString(), s);
-      } catch (DuplicateSymException e) {
-         int ln = myId.getLineNum();
-         int cn = myId.getCharNum();
-         ErrMsg.fatal(ln, cn, "Multiply declared identifier");
-      } catch (EmptySymTableException e) {
-         int ln = myId.getLineNum();
-         int cn = myId.getCharNum();
-         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      	 }catch(EmptySymTableException e){
+      	 	int ln = myId.getLineNum();
+         	int cn = myId.getCharNum();
+         	ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      	 }
       }
+     
+     // System.out.println("Type: " + s.getType() + ", Name: " + myId.toString());
+     
 	}
 
 	public String getFormalTypes(){
