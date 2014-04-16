@@ -907,7 +907,7 @@ class DotAccessExpNode extends ExpNode {
 			//s1.s2.s3
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
-         	Sym curr = symTbl.lookupGlobal(myLoc.toString());
+         	Sym curr = tbl.lookupGlobal(myLoc.toString());
 			if(curr != null){
             	if((curr.getType()).equals("struct")) {
                		SymTable ssym = (SymTable) curr.getData();

@@ -3,4 +3,6 @@ struct testStruct{
 	int y;
 };
 struct testStruct s;
-
+void foo(){
+	s.x = 3;
+}
