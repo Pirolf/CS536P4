@@ -380,7 +380,14 @@ class FormalDeclNode extends DeclNode {
 	}
 	public void analyzeName(SymTable tbl){    
       try {
-         tbl.addDecl(myId.toString(), new Sym(myType.getTypeNodeType()));
+      	if((myType.getTypeNodeType()).equals("void")){
+      		int ln = myId.getLineNum();
+         	int cn = myId.getCharNum();
+      		ErrMsg.fatal(ln, cn, "Non-function declared void");
+      	}else{
+      		tbl.addDecl(myId.toString(), new Sym(myType.getTypeNodeType()));
+      	}
+         
       } catch (DuplicateSymException e) {
          int ln = myId.getLineNum();
          int cn = myId.getCharNum();
@@ -771,6 +778,9 @@ class ReturnStmtNode extends StmtNode {
 		p.println(";");
 	}
 	public void analyzeName(SymTable tbl){
+		if(myExp == null){
+			return;
+		}
 		myExp.analyzeName(tbl);
 	}
 	// 1 kid
@@ -932,23 +942,23 @@ class DotAccessExpNode extends ExpNode {
                ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
             }else{
             	System.out.println(myId.toString());
-            Sym structField = ssym.lookupGlobal(myId.toString());
+            	Sym structField = ssym.lookupGlobal(myId.toString());
 				if(structField == null){
-				   //RHS of dot-access is not a field of the appropriate a struct
-				   int ln = myId.getLineNum();
-         		int cn = myId.getCharNum();
-         	   ErrMsg.fatal(ln, cn, "Invalid struct field name");
-				 }else{
+					//RHS of dot-access is not a field of the appropriate a struct
+					int ln = myId.getLineNum();
+         			int cn = myId.getCharNum();
+         	  	 	ErrMsg.fatal(ln, cn, "Invalid struct field name");
+				}else{
 				      //no error
 				   		return;
-			      	} 
+			     } 
            	   //}else{
            	   		//LHS not struct
            	   	//	System.out.println(curr.getType());
            	   	//	int leftln = ((IdNode)myLoc).getLineNum();
          		//	int leftcn = ((IdNode)myLoc).getCharNum();
          		//	ErrMsg.fatal(leftln, leftcn, "Dot-access of non-struct type");
-            }
+            	}
             
            	   //}
         	}else{

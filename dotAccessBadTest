@@ -1,4 +1,13 @@
-//Dot-access of non-struct type
+//Non-function declared void: var
+//void v;
+//test RetStmt
+int goodRetFunc(int c){
+	return;
+}
+//Non-function declared void: param
+int badFunc(void c){
+	return;
+}
 bool a;
 struct ts{
 	int t;
@@ -10,6 +19,10 @@ struct testStruct{
 };
 struct testStruct s;
 void foo(){
-	a.x = 3;
+	//Dot-access of non-struct type
+	//a.x = 3;
+	//Invalid struct field name
+	//s.xyz = 2;
 	s.testStruct2.t = 5;
 }
+
