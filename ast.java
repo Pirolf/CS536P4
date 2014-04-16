@@ -282,6 +282,11 @@ class VarDeclNode extends DeclNode {
       
       if (myType instanceof StructNode) {
          Sym temp = tbl.lookupGlobal(myType.getTypeNodeType());
+         if(temp == null){
+         	int ln = myId.getLineNum();
+         	int cn = myId.getCharNum();
+         	ErrMsg.fatal(ln, cn, "Invalid name of struct type");
+         }
          s.setData(temp.getData());
       }
       try {
@@ -941,7 +946,7 @@ class DotAccessExpNode extends ExpNode {
          		int structNamecn = ((IdNode)myLoc).getCharNum();
          		ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
         	}
-	   }else if(myLoc instanceof ExpNode){
+	   }else if(myLoc instanceof DotAccessExpNode){
            	 	myLoc.analyzeName(tbl);
        }
    }

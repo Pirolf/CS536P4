@@ -1,8 +1,13 @@
+struct ts{
+	int t;
+};
 struct testStruct{
 	int x;
 	int y;
+	struct ts testStruct2;
 };
 struct testStruct s;
 void foo(){
 	s.x = 3;
+	s.testStruct2.t = 5;
 }
