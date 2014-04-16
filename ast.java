@@ -132,7 +132,7 @@ class ProgramNode extends ASTnode {
 	}
 
 	public void analyzeName(){
-		tbl = new SymTable();
+		SymTable tbl = new SymTable();
 		myDeclList.analyzeName(tbl);
 	}
 	// 1 kid
@@ -242,7 +242,7 @@ class ExpListNode extends ASTnode {
 			}
 		} 
 	}
-	public void analyzeName(SymTale tbl){
+	public void analyzeName(SymTable tbl){
       for (ExpNode n : myExps)
          n.analyzeName(tbl);
 	}
@@ -533,7 +533,7 @@ class PostIncStmtNode extends StmtNode {
 		p.println("++;");
 	}
 	public void analyzeName(SymTable tbl){
-		myExp.analyzeName(SymTable tbl);
+		myExp.analyzeName(tbl);
 	}
 	// 1 kid
 	private ExpNode myExp;
