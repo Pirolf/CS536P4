@@ -131,7 +131,7 @@ class ProgramNode extends ASTnode {
 	}
 
 	public void analyzeName(){
-		SymTable symTbl = new SymTable();
+		symTbl = new SymTable();
 		myDeclList.analyzeName(symTbl);
 	}
 	// 1 kid
@@ -282,6 +282,7 @@ class VarDeclNode extends DeclNode {
       }
       
       if (myType instanceof StructNode) {
+         if(symTbl == null){System.out.println("symTbl is null");}
          Sym temp = symTbl.lookupGlobal(myType.getTypeNodeType());
          if(temp == null){
          	int ln = myId.getLineNum();
