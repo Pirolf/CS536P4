@@ -409,7 +409,7 @@ class StructDeclNode extends DeclNode {
 		//scope entry
 		SymTable strctTable = new SymTable();
       myDeclList.analyzeName(strctTable);
-		tbl.lookupLocal(myId.toString());
+		//tbl.lookupLocal(myId.toString());
       Sym s = new Sym("struct");
       s.setData(strctTable);
       try {
@@ -916,13 +916,8 @@ class DotAccessExpNode extends ExpNode {
 				   	//RHS of dot-access is not a field of the appropriate a struct
 				   		int ln = myId.getLineNum();
          				int cn = myId.getCharNum();
-         				ErrMsg.fatal(ln, cn, "Dot-access of non-struct type");
-				  	}else if(!structField.getType().equals(myLoc.toString())){
-				   	//duplicate decl in struct like: int a; bool a;
-				  		int ln = myId.getLineNum();
-         				int cn = myId.getCharNum();
-         				ErrMsg.fatal(ln, cn, "Multiply declared identifier");
-				   	}else{
+         				ErrMsg.fatal(ln, cn, "Invalid struct field name");
+				  	}else{
 				      //no error
 				   		return;
 			      	} 
@@ -930,7 +925,7 @@ class DotAccessExpNode extends ExpNode {
            	   		//LHS not struct
            	   		int leftln = ((IdNode)myLoc).getLineNum();
          			int leftcn = ((IdNode)myLoc).getCharNum();
-         			ErrMsg.fatal(leftln, leftcn, "Invalid struct field name");
+         			ErrMsg.fatal(leftln, leftcn, "Dot-access of non-struct type");
            	   }
         	}else{
         		//structSym(curr) is null: undeclared
