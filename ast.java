@@ -911,6 +911,8 @@ class DotAccessExpNode extends ExpNode {
 				//String correctType = s.getType();
             	//if((curr.getType()).equals(correctType)){
             SymTable ssym = (SymTable)(curr.getData());
+            if(ssym == null){System.out.println("ssym is null");}
+            System.out.println(myId.toString());
             Sym structField = ssym.lookupGlobal(myId.toString());
 				if(structField == null){
 				   //RHS of dot-access is not a field of the appropriate a struct
