@@ -365,7 +365,20 @@ class FnDeclNode extends DeclNode {
 
 
       myId.setSym(s);
+      System.out.println("Type: " + s.getType() + ", Name: " + myId.toString());
       try {
+         Sym dupFunc = tbl.lookupGlobal(myId.toString());
+         /*
+         if(dupFunc == null){
+         	System.out.println("dupFunc is null");
+         }else{
+         	System.out.println(dupFunc.getType() + "dupFunc is NOT null");
+         }
+         */
+         if(dupFunc != null){
+         	//tbl.addDecl(myId.toString(), s);
+         	throw new DuplicateSymException();
+         }
          tbl.addDecl(myId.toString(), s);
       } catch (DuplicateSymException e) {
          int ln = myId.getLineNum();
