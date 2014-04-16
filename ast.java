@@ -211,8 +211,17 @@ class FnBodyNode extends ASTnode {
 		myStmtList.unparse(p, indent);
 	}
 	public void analyzeName(SymTable tbl){
+		//tbl.addScope();
 		myDeclList.analyzeName(tbl);
 		myStmtList.analyzeName(tbl);
+		/*
+		try{
+			tbl.removeScope();
+		}catch(EmptySymTableException e){
+			ErrMsg.fatal(0, 0, "EmptySymTable: you screwed up");
+		}
+		*/
+		
 	}
 	// 2 kids
 	private DeclListNode myDeclList;
@@ -293,7 +302,7 @@ class VarDeclNode extends DeclNode {
       }
       
       if (myType instanceof StructNode) {
-         if(symTbl == null){System.out.println("symTbl is null");}
+         //if(symTbl == null){System.out.println("symTbl is null");}
          Sym temp = symTbl.lookupGlobal(myType.getTypeNodeType());
          if(temp == null){
          	int ln = myId.getLineNum();
@@ -365,7 +374,7 @@ class FnDeclNode extends DeclNode {
 
 
       myId.setSym(s);
-      System.out.println("Type: " + s.getType() + ", Name: " + myId.toString());
+     // System.out.println("Type: " + s.getType() + ", Name: " + myId.toString());
       try {
          Sym dupFunc = tbl.lookupGlobal(myId.toString());
          /*
@@ -375,8 +384,10 @@ class FnDeclNode extends DeclNode {
          	System.out.println(dupFunc.getType() + "dupFunc is NOT null");
          }
          */
+         
          if(dupFunc != null){
          	//tbl.addDecl(myId.toString(), s);
+
          	throw new DuplicateSymException();
          }
          tbl.addDecl(myId.toString(), s);
@@ -982,7 +993,7 @@ class DotAccessExpNode extends ExpNode {
                int structNamecn = ((IdNode)myLoc).getCharNum();
                ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
             }else{
-            	System.out.println(myId.toString());
+            	//System.out.println(myId.toString());
                myId.analyzeName(ssym);
             	Sym structField = ssym.lookupGlobal(myId.toString());
 				if(structField == null){
