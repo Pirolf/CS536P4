@@ -276,7 +276,7 @@ class VarDeclNode extends DeclNode {
 	public void analyzeName(SymTable tbl) {
       Sym s = new Sym(myType.getTypeNodeType());
       
-      if (s.getType() == "void"){
+      if ((s.getType()).equals("void")){
          ErrMsg.fatal(myId.getLineNum(), myId.getCharNum(), "Non-function declared void");
          return;
       }
@@ -287,8 +287,10 @@ class VarDeclNode extends DeclNode {
          	int ln = myId.getLineNum();
          	int cn = myId.getCharNum();
          	ErrMsg.fatal(ln, cn, "Invalid name of struct type");
+         }else{
+         	s.setData(temp.getData());
          }
-         s.setData(temp.getData());
+         
       }
       try {
          tbl.addDecl(myId.toString(), s);
