@@ -11,3 +11,8 @@ void foo(){
 	s.x = 3;
 	s.testStruct2.t = 5;
 }
+
+//test RetStmt
+int goodRetFunc(int c){
+	return;
+}

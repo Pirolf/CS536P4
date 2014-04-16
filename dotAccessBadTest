@@ -1,9 +1,13 @@
+//Multiply declared identifier
+int m1;
+int m1;
+//Multiply declared identifier
+int m2;
+bool m2;
+
 //Non-function declared void: var
-//void v;
-//test RetStmt
-int goodRetFunc(int c){
-	return;
-}
+void v;
+
 //Non-function declared void: param
 int badFunc(void c){
 	return;
@@ -20,9 +24,11 @@ struct testStruct{
 struct testStruct s;
 void foo(){
 	//Dot-access of non-struct type
-	//a.x = 3;
+	a.x = 3;
 	//Invalid struct field name
-	//s.xyz = 2;
+	s.xyz = 2;
 	s.testStruct2.t = 5;
 }
+//Undeclared identifier
+k = 1;
 
