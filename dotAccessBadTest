@@ -1,0 +1,15 @@
+//Dot-access of non-struct type
+bool a;
+struct ts{
+	int t;
+};
+struct testStruct{
+	int x;
+	int y;
+	struct ts testStruct2;
+};
+struct testStruct s;
+void foo(){
+	a.x = 3;
+	s.testStruct2.t = 5;
+}
