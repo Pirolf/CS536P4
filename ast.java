@@ -930,8 +930,8 @@ class DotAccessExpNode extends ExpNode {
                int structNameln = ((IdNode)myLoc).getLineNum();
                int structNamecn = ((IdNode)myLoc).getCharNum();
                ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
-            }
-            System.out.println(myId.toString());
+            }else{
+            	System.out.println(myId.toString());
             Sym structField = ssym.lookupGlobal(myId.toString());
 				if(structField == null){
 				   //RHS of dot-access is not a field of the appropriate a struct
@@ -948,6 +948,8 @@ class DotAccessExpNode extends ExpNode {
            	   	//	int leftln = ((IdNode)myLoc).getLineNum();
          		//	int leftcn = ((IdNode)myLoc).getCharNum();
          		//	ErrMsg.fatal(leftln, leftcn, "Dot-access of non-struct type");
+            }
+            
            	   //}
         	}else{
         		//structSym(curr) is null: undeclared
