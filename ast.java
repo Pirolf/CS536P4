@@ -112,6 +112,7 @@ abstract class ASTnode{
 	protected void doIndent(PrintWriter p, int indent) {
 		for (int k=0; k<indent; k++) p.print(" ");
 	}
+   public static SymTable symTbl;
 }
 
 // **********************************************************************
@@ -130,8 +131,8 @@ class ProgramNode extends ASTnode {
 	}
 
 	public void analyzeName(){
-		SymTable tbl = new SymTable();
-		myDeclList.analyzeName(tbl);
+		SymTable symTbl = new SymTable();
+		myDeclList.analyzeName(symTbl);
 	}
 	// 1 kid
 	private DeclListNode myDeclList;
@@ -281,7 +282,7 @@ class VarDeclNode extends DeclNode {
       }
       
       if (myType instanceof StructNode) {
-         Sym temp = tbl.lookupGlobal(myType.getTypeNodeType());
+         Sym temp = symTable.lookupGlobal(myType.getTypeNodeType());
          s.setData(temp.getData());
       }
       try {
