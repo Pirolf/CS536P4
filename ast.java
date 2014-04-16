@@ -280,6 +280,10 @@ class VarDeclNode extends DeclNode {
          return;
       }
       
+      if (myType instanceof StructNode) {
+         Sym temp = tbl.lookupGlobal(myType.getTypeNodeType());
+         s.setData(temp.getData());
+      }
       try {
          tbl.addDecl(myId.toString(), s);
       } catch (DuplicateSymException e) {
@@ -484,7 +488,8 @@ class StructNode extends TypeNode {
 		myId.unparse(p, 0);
 	}
 	public void analyzeName(SymTable tbl){
-		//should look up in stuct symtable
+      if (tbl.lookupGlobal(myId.toString()) == null)
+         ErrMsg.fatal(myId.getLineNum(), myId.getCharNum(), "Invalid name of struct type");
 	}
 
 	public String getTypeNodeType(){
@@ -909,7 +914,7 @@ class DotAccessExpNode extends ExpNode {
 			if(curr != null){
 				//Sym s = ((IdNode)myLoc).getSym();
 				//String correctType = s.getType();
-            	//if((curr.getType()).equals(correctType)){
+            //if((curr.getType()).equals(correctType)){
             SymTable ssym = (SymTable)(curr.getData());
             if(ssym == null){System.out.println("ssym is null");}
             System.out.println(myId.toString());
