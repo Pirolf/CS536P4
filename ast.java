@@ -288,7 +288,6 @@ class VarDeclNode extends DeclNode {
          	int cn = myId.getCharNum();
          	ErrMsg.fatal(ln, cn, "Invalid name of struct type");
          }
-         Sym temp = symTable.lookupGlobal(myType.getTypeNodeType());
          s.setData(temp.getData());
       }
       try {
