@@ -895,6 +895,7 @@ class IdNode extends ExpNode {
 	}
 
 	public void unparse(PrintWriter p, int indent) {
+<<<<<<< HEAD
 	  p.print(myStrVal);
       if (mySym != null){
       	if(mySym.getFnType().equals("nonfunc")){
@@ -902,9 +903,13 @@ class IdNode extends ExpNode {
       		p.print("("+ mySym.getType() + ")");
       	}
       }      	
+=======
+		p.print(myStrVal);
+      if (mySym != null)
+         p.print("("+ mySym.getType() + ")");
+>>>>>>> fd869e162807624c5489703d58ec47514624b95c
 	}
 
-   // has to override for abstract class...
 	public void analyzeName(SymTable tbl){
       mySym = tbl.lookupGlobal(myStrVal); 
 		if (mySym == null)
@@ -958,7 +963,8 @@ class DotAccessExpNode extends ExpNode {
 			//s1.s2.s3
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
-         	Sym curr = tbl.lookupGlobal(myLoc.toString());
+         Sym curr = tbl.lookupGlobal(myLoc.toString());
+         myLoc.analyzeName(tbl);
 			if(curr != null){
 				//Sym s = ((IdNode)myLoc).getSym();
 				//String correctType = s.getType();
@@ -970,6 +976,7 @@ class DotAccessExpNode extends ExpNode {
                ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
             }else{
             	System.out.println(myId.toString());
+               myId.analyzeName(ssym);
             	Sym structField = ssym.lookupGlobal(myId.toString());
 				if(structField == null){
 					//RHS of dot-access is not a field of the appropriate a struct
