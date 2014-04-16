@@ -909,8 +909,10 @@ class DotAccessExpNode extends ExpNode {
 			//look up in structSymTbl: is myId a field of the struct
          	Sym curr = tbl.lookupGlobal(myLoc.toString());
 			if(curr != null){
-            	if((curr.getType()).equals("struct")) {
-               		SymTable ssym = (SymTable) curr.getData();
+				//Sym s = ((IdNode)myLoc).getSym();
+				//String correctType = s.getType();
+            	//if((curr.getType()).equals(correctType)){
+               		SymTable ssym = (SymTable)(curr.getData());
                		Sym structField = ssym.lookupGlobal(myId.toString());
 				   	if(structField == null){
 				   	//RHS of dot-access is not a field of the appropriate a struct
@@ -921,17 +923,18 @@ class DotAccessExpNode extends ExpNode {
 				      //no error
 				   		return;
 			      	} 
-           	   }else{
+           	   //}else{
            	   		//LHS not struct
-           	   		int leftln = ((IdNode)myLoc).getLineNum();
-         			int leftcn = ((IdNode)myLoc).getCharNum();
-         			ErrMsg.fatal(leftln, leftcn, "Dot-access of non-struct type");
-           	   }
+           	   	//	System.out.println(curr.getType());
+           	   	//	int leftln = ((IdNode)myLoc).getLineNum();
+         		//	int leftcn = ((IdNode)myLoc).getCharNum();
+         		//	ErrMsg.fatal(leftln, leftcn, "Dot-access of non-struct type");
+           	   //}
         	}else{
         		//structSym(curr) is null: undeclared
         		int structNameln = ((IdNode)myLoc).getLineNum();
          		int structNamecn = ((IdNode)myLoc).getCharNum();
-         		ErrMsg.fatal(structNameln, structNamecn, "Undeclared identifier");
+         		ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
         	}
 	   }else if(myLoc instanceof ExpNode){
            	 	myLoc.analyzeName(tbl);
