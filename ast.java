@@ -872,13 +872,13 @@ class IdNode extends ExpNode {
 
 	public void unparse(PrintWriter p, int indent) {
 		p.print(myStrVal);
-      
-      p.print("("+ mySym.getType() + ")");	
+      if (mySym != null)
+         p.print("("+ mySym.getType() + ")");	
 	}
 
    // has to override for abstract class...
 	public void analyzeName(SymTable tbl){
-      mySym = tbl.lookupGlobal(myStrVal); 
+      mySym = symTbl.lookupGlobal(myStrVal); 
 		if (mySym == null)
          ErrMsg.fatal(myLineNum, myCharNum, "Undeclared identifier");
 	}
