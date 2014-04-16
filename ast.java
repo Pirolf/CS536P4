@@ -895,7 +895,6 @@ class IdNode extends ExpNode {
 	}
 
 	public void unparse(PrintWriter p, int indent) {
-<<<<<<< HEAD
 	  p.print(myStrVal);
       if (mySym != null){
       	if(mySym.getFnType().equals("nonfunc")){
@@ -903,11 +902,6 @@ class IdNode extends ExpNode {
       		p.print("("+ mySym.getType() + ")");
       	}
       }      	
-=======
-		p.print(myStrVal);
-      if (mySym != null)
-         p.print("("+ mySym.getType() + ")");
->>>>>>> fd869e162807624c5489703d58ec47514624b95c
 	}
 
 	public void analyzeName(SymTable tbl){
