@@ -278,7 +278,6 @@ class VarDeclNode extends DeclNode {
       
       if ((s.getType()).equals("void")){
          ErrMsg.fatal(myId.getLineNum(), myId.getCharNum(), "Non-function declared void");
-         return;
       }
       
       if (myType instanceof StructNode) {
@@ -291,8 +290,8 @@ class VarDeclNode extends DeclNode {
          }else{
          	s.setData(temp.getData());
          }
-         
       }
+      
       try {
          tbl.addDecl(myId.toString(), s);
       } catch (DuplicateSymException e) {
@@ -863,12 +862,14 @@ class IdNode extends ExpNode {
 
 	public void unparse(PrintWriter p, int indent) {
 		p.print(myStrVal);
-      //p.print("("+ mySym.getType() + ")");	
+      
+      p.print("("+ mySym.getType() + ")");	
 	}
 
    // has to override for abstract class...
 	public void analyzeName(SymTable tbl){
-		if (tbl.lookupGlobal(myStrVal) == null)
+      mySym = tbl.lookupGlobal(myStrVal); 
+		if (mySym == null)
          ErrMsg.fatal(myLineNum, myCharNum, "Undeclared identifier");
 	}
 
@@ -925,7 +926,11 @@ class DotAccessExpNode extends ExpNode {
 				//String correctType = s.getType();
             //if((curr.getType()).equals(correctType)){
             SymTable ssym = (SymTable)(curr.getData());
-            if(ssym == null){System.out.println("ssym is null");}
+            if(ssym == null) {
+               int structNameln = ((IdNode)myLoc).getLineNum();
+               int structNamecn = ((IdNode)myLoc).getCharNum();
+               ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
+            }
             System.out.println(myId.toString());
             Sym structField = ssym.lookupGlobal(myId.toString());
 				if(structField == null){
@@ -947,8 +952,8 @@ class DotAccessExpNode extends ExpNode {
         	}else{
         		//structSym(curr) is null: undeclared
         		int structNameln = ((IdNode)myLoc).getLineNum();
-         		int structNamecn = ((IdNode)myLoc).getCharNum();
-         		ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
+         	int structNamecn = ((IdNode)myLoc).getCharNum();
+         	ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
         	}
 	   }else if(myLoc instanceof DotAccessExpNode){
            	 	myLoc.analyzeName(tbl);
