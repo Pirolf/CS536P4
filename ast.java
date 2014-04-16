@@ -184,6 +184,18 @@ class FormalsListNode extends ASTnode {
       for (FormalDeclNode n : myFormals)
          n.analyzeName(tbl);
 	}
+
+	public String getFormalTypes(){
+		String formalsString = "";
+		Iterator<FormalDeclNode> it = myFormals.iterator();
+		if(it.hasNext()){
+			formalsString += (it.next()).formalType();
+			while(it.hasNext()){
+				formalsString = formalsString + ", " + (it.next()).formalType();
+			}
+		}
+		return formalsString;
+	}
 	// list of kids (FormalDeclNodes)
 	private List<FormalDeclNode> myFormals;
 }
@@ -338,7 +350,7 @@ class FnDeclNode extends DeclNode {
 	public void analyzeName(SymTable tbl){       
       tbl.addScope();
       myFormalsList.analyzeName(tbl);
-		myBody.analyzeName(tbl);
+	  myBody.analyzeName(tbl);
       try {
          tbl.removeScope();
       } catch (EmptySymTableException e) {
@@ -346,7 +358,12 @@ class FnDeclNode extends DeclNode {
          int cn = myId.getCharNum();
          ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
       }
+      String fnType = getFormalTypes() + "->" + myType.getTypeNodeType();
+      //System.out.println(fnType);
       Sym s = new Sym(myType.getTypeNodeType());
+      s.setFnType(fnType);
+
+
       myId.setSym(s);
       try {
          tbl.addDecl(myId.toString(), s);
@@ -359,6 +376,10 @@ class FnDeclNode extends DeclNode {
          int cn = myId.getCharNum();
          ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
       }
+	}
+
+	public String getFormalTypes(){
+		return myFormalsList.getFormalTypes();
 	}
 	// 4 kids
 	private TypeNode myType;
@@ -399,6 +420,9 @@ class FormalDeclNode extends DeclNode {
       }
          
 		//we don't have to deal with struct here because it is not allowed to be a param
+	}
+	public String formalType(){
+		return myType.getTypeNodeType();
 	}
 	// 2 kids
 	private TypeNode myType;
@@ -871,9 +895,13 @@ class IdNode extends ExpNode {
 	}
 
 	public void unparse(PrintWriter p, int indent) {
-		p.print(myStrVal);
-      if (mySym != null)
-         p.print("("+ mySym.getType() + ")");	
+	  p.print(myStrVal);
+      if (mySym != null){
+      	if(mySym.getFnType().equals("nonfunc")){
+      		//non function
+      		p.print("("+ mySym.getType() + ")");
+      	}
+      }      	
 	}
 
    // has to override for abstract class...
@@ -1012,6 +1040,9 @@ class CallExpNode extends ExpNode {
 	// ** unparse **
 	public void unparse(PrintWriter p, int indent) {
 		myId.unparse(p, 0);
+		Sym funcSym = symTbl.lookupGlobal(myId.toString());
+		
+		p.print("(" +funcSym.getFnType() + ")");
 		p.print("(");
 		if (myExpList != null) {
 			myExpList.unparse(p, 0);
