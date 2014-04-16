@@ -878,7 +878,7 @@ class IdNode extends ExpNode {
 
    // has to override for abstract class...
 	public void analyzeName(SymTable tbl){
-      mySym = symTbl.lookupGlobal(myStrVal); 
+      mySym = tbl.lookupGlobal(myStrVal); 
 		if (mySym == null)
          ErrMsg.fatal(myLineNum, myCharNum, "Undeclared identifier");
 	}
