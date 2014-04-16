@@ -112,8 +112,6 @@ abstract class ASTnode{
 	protected void doIndent(PrintWriter p, int indent) {
 		for (int k=0; k<indent; k++) p.print(" ");
 	}
-   
-	public static SymTable symTbl;
 }
 
 // **********************************************************************
@@ -612,12 +610,12 @@ class IfStmtNode extends StmtNode {
 	public void analyzeName(SymTable tbl){
 		myExp.analyzeName(tbl);
 		//scope entry
-		symTbl.addScope();
+		tbl.addScope();
       myDeclList.analyzeName(tbl);
       myStmtList.analyzeName(tbl);
 		//scope exit
       try {
-         symTbl.removeScope();
+         tbl.removeScope();
       } catch (EmptySymTableException e) {
          int ln = 0;
          int cn = 0;
@@ -672,7 +670,7 @@ class IfElseStmtNode extends StmtNode {
          ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
       }
 		//scope entry
-		symTbl.addScope();
+		tbl.addScope();
 		myElseDeclList.analyzeName(tbl);
 		myElseStmtList.analyzeName(tbl);
 		//scope exit: else
@@ -711,11 +709,11 @@ class WhileStmtNode extends StmtNode {
 	}
 	public void analyzeName(SymTable tbl){
 		myExp.analyzeName(tbl);
-      symTbl.addScope();
+      tbl.addScope();
       myDeclList.analyzeName(tbl);
       myStmtList.analyzeName(tbl);
 		try {
-         symTbl.removeScope();
+         tbl.removeScope();
       } catch (EmptySymTableException e) {
          int ln = 0;
          int cn = 0;
@@ -856,7 +854,7 @@ class IdNode extends ExpNode {
 
    // has to override for abstract class...
 	public void analyzeName(SymTable tbl){
-		if (symTbl.lookupGlobal(myStrVal) == null)
+		if (tbl.lookupGlobal(myStrVal) == null)
          ErrMsg.fatal(myLineNum, myCharNum, "Undeclared identifier");
 	}
 
@@ -912,14 +910,14 @@ class DotAccessExpNode extends ExpNode {
 				//Sym s = ((IdNode)myLoc).getSym();
 				//String correctType = s.getType();
             	//if((curr.getType()).equals(correctType)){
-               		SymTable ssym = (SymTable)(curr.getData());
-               		Sym structField = ssym.lookupGlobal(myId.toString());
-				   	if(structField == null){
-				   	//RHS of dot-access is not a field of the appropriate a struct
-				   		int ln = myId.getLineNum();
-         				int cn = myId.getCharNum();
-         				ErrMsg.fatal(ln, cn, "Invalid struct field name");
-				  	}else{
+            SymTable ssym = (SymTable)(curr.getData());
+            Sym structField = ssym.lookupGlobal(myId.toString());
+				if(structField == null){
+				   //RHS of dot-access is not a field of the appropriate a struct
+				   int ln = myId.getLineNum();
+         		int cn = myId.getCharNum();
+         	   ErrMsg.fatal(ln, cn, "Invalid struct field name");
+				 }else{
 				      //no error
 				   		return;
 			      	} 
