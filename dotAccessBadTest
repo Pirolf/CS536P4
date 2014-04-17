@@ -43,9 +43,14 @@ void foo(int a, int b){
 	//Dot-access of non-struct type
 	//a.x = 3;
 	//Invalid struct field name
+<<<<<<< HEAD
 	//s.xyz.t.p = 2;
 	s.testStruct2.t = true;
 	//s.testStruct2.aw.h = 3;
+=======
+	s.xyz = 2;
+	s.testStruct2.t = 5;
+>>>>>>> parent of 301fed4... make sure bad LHS of dotAccessNode only prints one error msg
 }
 void miao(int a, bool b, int c){
 	foo(1, 2);
