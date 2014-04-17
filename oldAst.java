@@ -147,7 +147,7 @@ class DeclListNode extends ASTnode {
 		Iterator it = myDecls.iterator();
 		try {
 			while (it.hasNext()) {
-            ((DeclNode)it.next()).unparse(p, indent);
+				((DeclNode)it.next()).unparse(p, indent);
 			}
 		} catch (NoSuchElementException ex) {
 			System.err.println("unexpected NoSuchElementException in DeclListNode.print");
@@ -297,25 +297,22 @@ class VarDeclNode extends DeclNode {
 	public void analyzeName(SymTable tbl) {
       Sym s = new Sym(myType.getTypeNodeType());
       
-      // Check for var decl'd as type "void"
       if ((s.getType()).equals("void")){
          ErrMsg.fatal(myId.getLineNum(), myId.getCharNum(), "Non-function declared void");
       }
       
-      // Make sure var is of a struct type that's been declared
       if (myType instanceof StructNode) {
+         //if(symTbl == null){System.out.println("symTbl is null");}
          Sym temp = symTbl.lookupGlobal(myType.getTypeNodeType());
          if(temp == null){
          	int ln = myId.getLineNum();
          	int cn = myId.getCharNum();
          	ErrMsg.fatal(ln, cn, "Invalid name of struct type");
          }else{
-            // Make sure var has access to names in the struct type's symtbl
-            s.setData(temp.getData());
+         	s.setData(temp.getData());
          }
       }
       
-      // Add id to symbol table
       try {
          tbl.addDecl(myId.toString(), s);
       } catch (DuplicateSymException e) {
@@ -338,34 +335,31 @@ class VarDeclNode extends DeclNode {
 }
 
 class FnDeclNode extends DeclNode {
-   public FnDeclNode(TypeNode type,
-         IdNode id,
-         FormalsListNode formalList,
-         FnBodyNode body) {
-      
-      myType = type;
-      myId = id;
-      myFormalsList = formalList;
-      myBody = body;
-   }
+	public FnDeclNode(TypeNode type,
+			IdNode id,
+			FormalsListNode formalList,
+			FnBodyNode body) {
+		myType = type;
+		myId = id;
+		myFormalsList = formalList;
+		myBody = body;
+	}
 
-   public void unparse(PrintWriter p, int indent) {
-      doIndent(p, indent);
-      myType.unparse(p, 0);
-      p.print(" ");
-      myId.unparse(p, 0);
-      p.print("(");
-      myFormalsList.unparse(p, 0);
-      p.println(") {");
-      myBody.unparse(p, indent+4);
-      p.println("}\n");
-   }
-   public void analyzeName(SymTable tbl){
-      Sym dupFunc = null;
-      try {
+	public void unparse(PrintWriter p, int indent) {
+		doIndent(p, indent);
+		myType.unparse(p, 0);
+		p.print(" ");
+		myId.unparse(p, 0);
+		p.print("(");
+		myFormalsList.unparse(p, 0);
+		p.println(") {");
+		myBody.unparse(p, indent+4);
+		p.println("}\n");
+	}
+	public void analyzeName(SymTable tbl){  
+	  Sym dupFunc = null;
+	   try {
          dupFunc = tbl.lookupGlobal(myId.toString());
-<<<<<<< HEAD
-=======
          /*
          if(dupFunc == null){
          	System.out.println("dupFunc is null");
@@ -375,53 +369,38 @@ class FnDeclNode extends DeclNode {
          */
 
          
->>>>>>> 275fbb2cc9338894fb864e4cbf5ebc84dbb12388
          if(dupFunc != null){
-            throw new DuplicateSymException();
+         	//tbl.addDecl(myId.toString(), s);
+
+         	throw new DuplicateSymException();
          }
+         //tbl.addDecl(myId.toString(), s);
       } catch (DuplicateSymException e) {
          int ln = myId.getLineNum();
          int cn = myId.getCharNum();
          ErrMsg.fatal(ln, cn, "Multiply declared identifier");
-<<<<<<< HEAD
-      }
-      tbl.addScope();
-      myFormalsList.analyzeName(tbl);
-      myBody.analyzeName(tbl);
-      try {
-         tbl.removeScope();
-      } catch (EmptySymTableException e) {
-         int ln = myId.getLineNum();
-         int cn = myId.getCharNum();
-         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
-      }
-
-      String fnType = getFormalTypes() + "->" + myType.getTypeNodeType();
-=======
       }   
             String fnType = getFormalTypes() + "->" + myType.getTypeNodeType();
       //System.out.println(fnType);
->>>>>>> 275fbb2cc9338894fb864e4cbf5ebc84dbb12388
       Sym s = new Sym(myType.getTypeNodeType());
       s.setFnType(fnType);
+
+
       myId.setSym(s);
-      
       if(dupFunc == null){
-     	   try{
-            tbl.addDecl(myId.toString(), s);
-         }catch(DuplicateSymException e){
-            int ln = myId.getLineNum();
-        	   int cn = myId.getCharNum();
-            ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+      	 try{
+      	 	tbl.addDecl(myId.toString(), s);
+      	 }catch(DuplicateSymException e){
+      	 	int ln = myId.getLineNum();
+        	int cn = myId.getCharNum();
+         	ErrMsg.fatal(ln, cn, "Multiply declared identifier");
+
       	 }catch(EmptySymTableException e){
-      	   int ln = myId.getLineNum();
-            int cn = myId.getCharNum();
-            ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
-           }
+      	 	int ln = myId.getLineNum();
+         	int cn = myId.getCharNum();
+         	ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      	 }
       }
-<<<<<<< HEAD
-   }
-=======
       tbl.addScope();
       myFormalsList.analyzeName(tbl);
 	  myBody.analyzeName(tbl);
@@ -437,7 +416,6 @@ class FnDeclNode extends DeclNode {
      // System.out.println("Type: " + s.getType() + ", Name: " + myId.toString());
      
 	}
->>>>>>> 275fbb2cc9338894fb864e4cbf5ebc84dbb12388
 
 	public String getFormalTypes(){
 		return myFormalsList.getFormalTypes();
@@ -965,27 +943,8 @@ class IdNode extends ExpNode {
       }      	
 	}
 
-   // Returns sym table for struct type id, null for primitives & undecl'd
-   public SymTable getTbl(SymTable tbl) {
-      // Check that it's declared in scope
-      this.analyzeName(tbl);
-      if (mySym == null){
-         System.out.println(myStrVal + "has no symbol");
-         return null;
-      }
-
-      // Check it's a struct type
-      Sym s = symTbl.lookupGlobal(mySym.getType());
-      System.out.println(myStrVal + "'s type " + mySym.getType());
-      SymTable table;
-      table = (SymTable) mySym.getData();
-
-      // return this id's symtable (will be null in case of nonstruct)
-      return table;
-   }
-
 	public void analyzeName(SymTable tbl){
-      mySym = tbl.lookupGlobal(myStrVal);
+      mySym = tbl.lookupGlobal(myStrVal); 
 		if (mySym == null)
          ErrMsg.fatal(myLineNum, myCharNum, "Undeclared identifier");
 	}
@@ -1056,82 +1015,7 @@ class DotAccessExpNode extends ExpNode {
 		//p.print("(" + myId.getStructFieldType() + ")");
 		//p.print("(" + analyzeName(symTbl) + ")");
 	}
-   
-   // A slightly different recursive approach...
-   public SymTable getTbl (SymTable tbl) {
-      // Base case, an invalid access has already happened
-      if (tbl == null)
-         return null;
-      
-      SymTable table = null;
-      // Base case, myLoc is an IdNode
-      if (myLoc instanceof IdNode){
-         System.out.println(myLoc.toString());
-         table = ((IdNode)myLoc).getTbl(symTbl);
-         // Tried to do a dot access of a nonstruct
-         if (table == null) {
-            System.out.println("table was null" + myLoc.toString());
-            int ln, cn;
-            ln = ((IdNode) myLoc).getLineNum();
-            cn = ((IdNode) myLoc).getCharNum();
-            ErrMsg.fatal(ln, cn, "Dot-access of non-struct type");
-            return null;
-         }
-      // Recursive case, is a dot access node (needs myLoc's sym table 1st!)
-      }else if (myLoc instanceof DotAccessExpNode) {
-         table = ((DotAccessExpNode) myLoc).getTbl(tbl);   
-         // Tried to do a dot access of nonstruct
-         if (table == null) {
-            int ln, cn;
-            ln = ((DotAccessExpNode) myLoc).getId().getLineNum();
-            cn = ((DotAccessExpNode) myLoc).getId().getCharNum();
-            ErrMsg.fatal(ln, cn, "Dot-access of non-struct type");
-            return null;
-         }
-      }
-      
-      Sym s = table.lookupGlobal(myId.toString());
-      // errmsg invalid structfield name
-      if (s == null){
-         int ln = myId.getLineNum();
-         int cn = myId.getCharNum();
-         ErrMsg.fatal(ln, cn, "Invalid struct field name");
-         return null;
-      }
-      return myId.getTbl(table); 
-   }
-
 	public void analyzeName(SymTable tbl){
-<<<<<<< HEAD
-      SymTable table = null;
-      if (myLoc instanceof DotAccessExpNode){ 
-         table = ((DotAccessExpNode) myLoc).getTbl(tbl);
-         // Some problem already caught
-         if (table == null)
-            return;
-      }else {
-         table = ((IdNode) myLoc).getTbl(tbl);
-         // dotaccess of nonstruct
-         if (table == null) {
-            int ln = ((IdNode) myLoc).getLineNum();
-            int cn = ((IdNode) myLoc).getCharNum();
-            ErrMsg.fatal(ln, cn, "Dot-access of non-struct type");
-            return;
-         }
-      }
-      Sym s = table.lookupGlobal(myId.toString());
-      // Very last id isn't in very last symbol table
-      if (s == null) {
-         int ln = myId.getLineNum();
-         int cn = myId.getCharNum();
-         ErrMsg.fatal(ln, cn, "Invalid struct field name");
-         return;
-      }
-      myId.analyzeName(table);   
-   }
-   public IdNode getId() {
-      return (IdNode) myId;
-=======
 		//base case
 		if(myLoc instanceof IdNode){
 			//s1.s2.s3
@@ -1200,7 +1084,6 @@ class DotAccessExpNode extends ExpNode {
            	 	myLoc.analyzeName(tbl);
        }
        if(myId.getSym() == null)myId.setSym(new Sym(myIdType));
->>>>>>> 275fbb2cc9338894fb864e4cbf5ebc84dbb12388
    }
 	// 2 kids
 	private ExpNode myLoc;    
