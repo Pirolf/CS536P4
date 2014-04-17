@@ -966,10 +966,17 @@ class IdNode extends ExpNode {
    public int getCharNum() {
       return myCharNum;
    }
+   public void setStructFieldType(String sft){
+   		structFieldType = sft;
+   }
+   public String getStructFieldType(){
+   	return structFieldType;
+   }
 	private int myLineNum;
 	private int myCharNum;
 	private String myStrVal;
 	private Sym mySym;//to link the node with the corresponding symbol-table entry
+	private String structFieldType;
 }
 /*
  * A bad struct access happens when
@@ -987,6 +994,19 @@ class DotAccessExpNode extends ExpNode {
 		myLoc.unparse(p, 0);
 		p.print(").");
 		myId.unparse(p, 0);
+		
+		//Sym curr = symTbl.lookupGlobal(myId.toString());
+		//if(curr == null){System.out.println("curr is null");}
+		/*
+		SymTable ssym = (SymTable)(curr.getData());
+		if(ssym == null){System.out.println("ssym is null");}
+		Sym structField = ssym.lookupGlobal(myId.toString());
+		String sfieldType = structField.getType();
+		*/
+		//String structFieldType = myId.getStructFieldType();
+
+		//p.print("(" + myId.getStructFieldType() + ")");
+		//p.print("(" + analyzeName(symTbl) + ")");
 	}
 	public void analyzeName(SymTable tbl){
 		//base case
@@ -995,7 +1015,7 @@ class DotAccessExpNode extends ExpNode {
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
          Sym curr = tbl.lookupGlobal(myLoc.toString());
-         myLoc.analyzeName(tbl);
+         //myLoc.analyzeName(tbl);
 			if(curr != null){
 				//Sym s = ((IdNode)myLoc).getSym();
 				//String correctType = s.getType();
@@ -1005,18 +1025,25 @@ class DotAccessExpNode extends ExpNode {
                int structNameln = ((IdNode)myLoc).getLineNum();
                int structNamecn = ((IdNode)myLoc).getCharNum();
                ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
+               return;
             }else{
             	//System.out.println(myId.toString());
-               myId.analyzeName(ssym);
+               //myId.analyzeName(ssym);
+               //commented above out because we only want one error msg: either
+            	//Undeclared Id or Invalid struct field name
             	Sym structField = ssym.lookupGlobal(myId.toString());
 				if(structField == null){
 					//RHS of dot-access is not a field of the appropriate a struct
 					int ln = myId.getLineNum();
          			int cn = myId.getCharNum();
          	  	 	ErrMsg.fatal(ln, cn, "Invalid struct field name");
+         	  	 	return;
 				}else{
 				      //no error
-				   		return;
+					//System.out.println(structField.getType());
+					//myId.setStructFieldType((((IdNode)myLoc).getSym()).getType());
+					//System.out.println(myId.getStructFieldType());
+				   		return ;//structField.getType();
 			     } 
            	   //}else{
            	   		//LHS not struct
@@ -1032,6 +1059,7 @@ class DotAccessExpNode extends ExpNode {
         		int structNameln = ((IdNode)myLoc).getLineNum();
          	int structNamecn = ((IdNode)myLoc).getCharNum();
          	ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
+         	
         	}
 	   }else if(myLoc instanceof DotAccessExpNode){
            	 	myLoc.analyzeName(tbl);

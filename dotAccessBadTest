@@ -42,7 +42,7 @@ void foo(int a, int b){
 	//Dot-access of non-struct type
 	a.x = 3;
 	//Invalid struct field name
-	s.xyz = 2;
+	s.xyz.t.p = 2;
 	s.testStruct2.t = 5;
 }
 void miao(int a, bool b, int c){
