@@ -946,7 +946,11 @@ class IdNode extends ExpNode {
 		if (mySym == null)
          ErrMsg.fatal(myLineNum, myCharNum, "Undeclared identifier");
 	}
-
+	
+	public void analyzeNameForDotAccess(SymTable tbl){
+		mySym = tbl.lookupGlobal(myStrVal); 
+	}
+	
 	public String toString(){
       return myStrVal;
    }
@@ -1015,11 +1019,8 @@ class DotAccessExpNode extends ExpNode {
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
          Sym curr = tbl.lookupGlobal(myLoc.toString());
-         //myLoc.analyzeName(tbl);
+         ((IdNode)myLoc).analyzeNameForDotAccess(tbl);
 			if(curr != null){
-				//Sym s = ((IdNode)myLoc).getSym();
-				//String correctType = s.getType();
-            //if((curr.getType()).equals(correctType)){
             SymTable ssym = (SymTable)(curr.getData());
             if(ssym == null) {
                int structNameln = ((IdNode)myLoc).getLineNum();
@@ -1028,7 +1029,7 @@ class DotAccessExpNode extends ExpNode {
                return;
             }else{
             	//System.out.println(myId.toString());
-               //myId.analyzeName(ssym);
+               myId.analyzeNameForDotAccess(ssym);
                //commented above out because we only want one error msg: either
             	//Undeclared Id or Invalid struct field name
             	Sym structField = ssym.lookupGlobal(myId.toString());
