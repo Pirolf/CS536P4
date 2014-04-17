@@ -1043,7 +1043,9 @@ class DotAccessExpNode extends ExpNode {
          	  	 		return;
 					}else{
 				      //no error
-						System.out.println(myId.toString());
+					  //Trying to get every id printed with (type)
+						
+						//System.out.println(myId.toString());
 						try{
 							Sym idType = ssym.lookupGlobal((myId).toString());
 							/*
@@ -1052,11 +1054,12 @@ class DotAccessExpNode extends ExpNode {
 
 							}
 							*/
-							System.out.println(idType.getType());
+							//System.out.println(idType.getType());
 							if(myIdType.equals("")){
 								SymTable lastSymTbl = (SymTable)(structField.getData());
 								Sym lastSym = lastSymTbl.lookupLocal((myIdCopy).toString());
 								if(lastSym != null){myIdType = lastSym.getType();}
+								//else{System.out.println("last sym is null");}
 								System.out.println(idType.getType());
 							}
 						}catch(Exception e){

@@ -14,12 +14,13 @@ int badFunc(void c){
 	return;
 }
 bool a;
-//multiple decl for struct
-struct ts{
-	bool t;
+//multiple decl for struct: TO BE ADDED
+struct oh{
+	int h;
 };
 struct ts{
 	bool t;
+	struct oh aw;
 };
 //This returns an Invalid Name of A Struct Type
 struct recursiveStruct{
@@ -40,10 +41,11 @@ void foo(int a){
 }
 void foo(int a, int b){
 	//Dot-access of non-struct type
-	a.x = 3;
+	//a.x = 3;
 	//Invalid struct field name
-	s.xyz.t.p = 2;
-	s.testStruct2.t = 5;
+	//s.xyz.t.p = 2;
+	s.testStruct2.t = true;
+	//s.testStruct2.aw.h = 3;
 }
 void miao(int a, bool b, int c){
 	foo(1, 2);

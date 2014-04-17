@@ -11,8 +11,14 @@ struct testStruct{
 	struct ts testStruct2;
 };
 struct testStruct s;
+struct ts t;
+struct kitty k;
 void foo(){
-	//s.x = 3;
+	s.x = 3;
+	s.y = -1;
+	s.testStruct2 = t;
+	s.testStruct2.fluffy = k;
+	s.testStruct2.q = 0;
 	s.testStruct2.fluffy.eatTuna = true;
 }
 
