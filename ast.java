@@ -364,8 +364,7 @@ class FnDeclNode extends DeclNode {
       Sym dupFunc = null;
       try {
          dupFunc = tbl.lookupGlobal(myId.toString());
-<<<<<<< HEAD
-=======
+
          /*
          if(dupFunc == null){
          	System.out.println("dupFunc is null");
@@ -374,8 +373,6 @@ class FnDeclNode extends DeclNode {
          }
          */
 
-         
->>>>>>> 275fbb2cc9338894fb864e4cbf5ebc84dbb12388
          if(dupFunc != null){
             throw new DuplicateSymException();
          }
@@ -383,7 +380,7 @@ class FnDeclNode extends DeclNode {
          int ln = myId.getLineNum();
          int cn = myId.getCharNum();
          ErrMsg.fatal(ln, cn, "Multiply declared identifier");
-<<<<<<< HEAD
+
       }
       tbl.addScope();
       myFormalsList.analyzeName(tbl);
@@ -397,17 +394,13 @@ class FnDeclNode extends DeclNode {
       }
 
       String fnType = getFormalTypes() + "->" + myType.getTypeNodeType();
-=======
-      }   
-            String fnType = getFormalTypes() + "->" + myType.getTypeNodeType();
       //System.out.println(fnType);
->>>>>>> 275fbb2cc9338894fb864e4cbf5ebc84dbb12388
       Sym s = new Sym(myType.getTypeNodeType());
       s.setFnType(fnType);
       myId.setSym(s);
       
       if(dupFunc == null){
-     	   try{
+     	  try{
             tbl.addDecl(myId.toString(), s);
          }catch(DuplicateSymException e){
             int ln = myId.getLineNum();
@@ -419,9 +412,7 @@ class FnDeclNode extends DeclNode {
             ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
            }
       }
-<<<<<<< HEAD
-   }
-=======
+   
       tbl.addScope();
       myFormalsList.analyzeName(tbl);
 	  myBody.analyzeName(tbl);
@@ -437,7 +428,6 @@ class FnDeclNode extends DeclNode {
      // System.out.println("Type: " + s.getType() + ", Name: " + myId.toString());
      
 	}
->>>>>>> 275fbb2cc9338894fb864e4cbf5ebc84dbb12388
 
 	public String getFormalTypes(){
 		return myFormalsList.getFormalTypes();
@@ -1102,7 +1092,6 @@ class DotAccessExpNode extends ExpNode {
    }
 
 	public void analyzeName(SymTable tbl){
-<<<<<<< HEAD
       SymTable table = null;
       if (myLoc instanceof DotAccessExpNode){ 
          table = ((DotAccessExpNode) myLoc).getTbl(tbl);
@@ -1131,7 +1120,6 @@ class DotAccessExpNode extends ExpNode {
    }
    public IdNode getId() {
       return (IdNode) myId;
-=======
 		//base case
 		if(myLoc instanceof IdNode){
 			//s1.s2.s3
@@ -1200,7 +1188,6 @@ class DotAccessExpNode extends ExpNode {
            	 	myLoc.analyzeName(tbl);
        }
        if(myId.getSym() == null)myId.setSym(new Sym(myIdType));
->>>>>>> 275fbb2cc9338894fb864e4cbf5ebc84dbb12388
    }
 	// 2 kids
 	private ExpNode myLoc;    
