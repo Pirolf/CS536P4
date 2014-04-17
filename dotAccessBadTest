@@ -16,10 +16,10 @@ int badFunc(void c){
 bool a;
 //multiple decl for struct
 struct ts{
-	int t;
+	bool t;
 };
 struct ts{
-	int t;
+	bool t;
 };
 //This returns an Invalid Name of A Struct Type
 struct recursiveStruct{

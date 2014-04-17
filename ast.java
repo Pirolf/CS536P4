@@ -367,6 +367,7 @@ class FnDeclNode extends DeclNode {
          	System.out.println(dupFunc.getType() + "dupFunc is NOT null");
          }
          */
+
          
          if(dupFunc != null){
          	//tbl.addDecl(myId.toString(), s);
@@ -379,17 +380,7 @@ class FnDeclNode extends DeclNode {
          int cn = myId.getCharNum();
          ErrMsg.fatal(ln, cn, "Multiply declared identifier");
       }   
-      tbl.addScope();
-      myFormalsList.analyzeName(tbl);
-	  myBody.analyzeName(tbl);
-      try {
-         tbl.removeScope();
-      } catch (EmptySymTableException e) {
-         int ln = myId.getLineNum();
-         int cn = myId.getCharNum();
-         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
-      }
-      String fnType = getFormalTypes() + "->" + myType.getTypeNodeType();
+            String fnType = getFormalTypes() + "->" + myType.getTypeNodeType();
       //System.out.println(fnType);
       Sym s = new Sym(myType.getTypeNodeType());
       s.setFnType(fnType);
@@ -410,6 +401,17 @@ class FnDeclNode extends DeclNode {
          	ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
       	 }
       }
+      tbl.addScope();
+      myFormalsList.analyzeName(tbl);
+	  myBody.analyzeName(tbl);
+      try {
+         tbl.removeScope();
+      } catch (EmptySymTableException e) {
+         int ln = myId.getLineNum();
+         int cn = myId.getCharNum();
+         ErrMsg.fatal(ln, cn, "okay, you really screwed up!");
+      }
+
      
      // System.out.println("Type: " + s.getType() + ", Name: " + myId.toString());
      
@@ -991,12 +993,13 @@ class DotAccessExpNode extends ExpNode {
 	public DotAccessExpNode(ExpNode loc, IdNode id) {
 		myLoc = loc;    
 		myId = id;
+		myIdCopy = id;
 	}
 
 	public void unparse(PrintWriter p, int indent) {
-		p.print("(");
+		//p.print("(");
 		myLoc.unparse(p, 0);
-		p.print(").");
+		p.print(".");
 		myId.unparse(p, 0);
 		
 		//Sym curr = symTbl.lookupGlobal(myId.toString());
@@ -1018,57 +1021,72 @@ class DotAccessExpNode extends ExpNode {
 			//s1.s2.s3
 			//check if myLoc is struct: lookup global in symTbl
 			//look up in structSymTbl: is myId a field of the struct
-         Sym curr = tbl.lookupGlobal(myLoc.toString());
-         ((IdNode)myLoc).analyzeNameForDotAccess(tbl);
-			if(curr != null){
-            SymTable ssym = (SymTable)(curr.getData());
-            if(ssym == null) {
-               int structNameln = ((IdNode)myLoc).getLineNum();
-               int structNamecn = ((IdNode)myLoc).getCharNum();
-               ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
-               return;
-            }else{
+        	 Sym curr = tbl.lookupGlobal(myLoc.toString());
+         	 ((IdNode)myLoc).analyzeNameForDotAccess(tbl);
+			 if(curr != null){
+             	SymTable ssym = (SymTable)(curr.getData());
+            	if(ssym == null) {
+               		int structNameln = ((IdNode)myLoc).getLineNum();
+               		int structNamecn = ((IdNode)myLoc).getCharNum();
+               		ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
+               		return;
+            	}else{
             	//System.out.println(myId.toString());
-               myId.analyzeNameForDotAccess(ssym);
-               //commented above out because we only want one error msg: either
+               		myId.analyzeNameForDotAccess(ssym);
             	//Undeclared Id or Invalid struct field name
-            	Sym structField = ssym.lookupGlobal(myId.toString());
-				if(structField == null){
+            		Sym structField = ssym.lookupGlobal(myId.toString());
+					if(structField == null){
 					//RHS of dot-access is not a field of the appropriate a struct
-					int ln = myId.getLineNum();
-         			int cn = myId.getCharNum();
-         	  	 	ErrMsg.fatal(ln, cn, "Invalid struct field name");
-         	  	 	return;
-				}else{
+						int ln = myId.getLineNum();
+         				int cn = myId.getCharNum();
+         	  	 		ErrMsg.fatal(ln, cn, "Invalid struct field name");
+         	  	 		return;
+					}else{
 				      //no error
-					//System.out.println(structField.getType());
-					//myId.setStructFieldType((((IdNode)myLoc).getSym()).getType());
-					//System.out.println(myId.getStructFieldType());
-				   		return ;//structField.getType();
-			     } 
-           	   //}else{
-           	   		//LHS not struct
-           	   	//	System.out.println(curr.getType());
-           	   	//	int leftln = ((IdNode)myLoc).getLineNum();
-         		//	int leftcn = ((IdNode)myLoc).getCharNum();
-         		//	ErrMsg.fatal(leftln, leftcn, "Dot-access of non-struct type");
+						System.out.println(myId.toString());
+						try{
+							Sym idType = ssym.lookupGlobal((myId).toString());
+							/*
+							while(idType.getData() != null){
+								SymTable currSymTbl = (SymTable)(idType.getData());
+
+							}
+							*/
+							System.out.println(idType.getType());
+							if(myIdType.equals("")){
+								SymTable lastSymTbl = (SymTable)(structField.getData());
+								Sym lastSym = lastSymTbl.lookupLocal((myIdCopy).toString());
+								if(lastSym != null){myIdType = lastSym.getType();}
+								System.out.println(idType.getType());
+							}
+						}catch(Exception e){
+
+						}
+						
+						//System.out.println(structField.getType()); //ts, should be int
+						//System.out.println(myId.getSym().getType());//ts as well, should be int
+
+						
+						
+				   		return ;
+			     	}
             	}
-            
-           	   //}
         	}else{
         		//structSym(curr) is null: undeclared
         		int structNameln = ((IdNode)myLoc).getLineNum();
-         	int structNamecn = ((IdNode)myLoc).getCharNum();
-         	ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");
-         	
+         		int structNamecn = ((IdNode)myLoc).getCharNum();
+         		ErrMsg.fatal(structNameln, structNamecn, "Dot-access of non-struct type");         	
         	}
 	   }else if(myLoc instanceof DotAccessExpNode){
            	 	myLoc.analyzeName(tbl);
        }
+       if(myId.getSym() == null)myId.setSym(new Sym(myIdType));
    }
 	// 2 kids
 	private ExpNode myLoc;    
 	private IdNode myId;
+	public static IdNode myIdCopy;
+	public static String myIdType = ""; 
    
 }
 class AssignNode extends ExpNode {
